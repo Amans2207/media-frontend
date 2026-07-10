@@ -43,10 +43,10 @@ const SnippetCutter = ({ url, themeColor, durationStr }) => {
         end_time: range[1].toString()
       };
 
-      const res = await axios.post('http://localhost:5000/api/trim', payload);
+      const res = await axios.post('https://media-backend-zyw5.onrender.com/api/trim', payload);
       const filename = res.data.filename;
       
-      const link = `http://localhost:5000/api/serve/${filename}`;
+      const link = `https://media-backend-zyw5.onrender.com/api/serve/${filename}`;
       setDownloadLink(link);
       toast.success('Snippet successfully processed!');
       
