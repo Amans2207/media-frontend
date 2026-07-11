@@ -143,6 +143,24 @@ const MediaLibrary = ({ themeColor }) => {
     }
   };
 
+  const handleShare = async (filename) => {
+    const url = `https://media-backend-production-b846.up.railway.app/api/serve/${filename}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Check out this video!',
+          text: 'Downloaded via Antigravity Media Downloader',
+          url: url
+        });
+      } catch (err) {
+        console.warn('Share cancelled or failed', err);
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success('Link copied to clipboard!');
+    }
+  };
+
   const clearHistory = () => {
     if (window.confirm("Are you sure you want to clear your local history?")) {
       localStorage.removeItem('media_history');
@@ -187,6 +205,10 @@ const MediaLibrary = ({ themeColor }) => {
         {/* HISTORY TAB */}
         {activeTab === 'history' && (
           <AnimatePresence>
+            <motion.div initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}} className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 text-xs p-3 rounded-xl mb-2 flex items-start gap-2">
+              <svg className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+              <span><strong>Auto-Delete Notice:</strong> Videos stored on the server will be automatically deleted after 30 minutes to free up space. Please use the <strong>Move to Vault</strong> button to permanently secure them in your browser's local memory.</span>
+            </motion.div>
             {history.map((item, idx) => (
               <motion.div 
                 key={`${item.filename}-${idx}`}
@@ -211,7 +233,7 @@ const MediaLibrary = ({ themeColor }) => {
                     <button 
                       onClick={() => moveToVault(item)}
                       disabled={isMovingToVault === item.filename}
-                      className="text-xs px-3 py-1.5 bg-pink-500/20 text-pink-400 rounded-lg hover:bg-pink-500/30 transition-colors flex items-center gap-1 border border-pink-500/30 disabled:opacity-50"
+                      className="text-xs px-3 py-1.5 bg-pink-500/20 text-pink-400 rounded-lg hover:bg-pink-500/30 transition-colors flex items-center gap-1 border border-pink-500/30 disabled:opacity-50 animate-pulse hover:animate-none shadow-[0_0_10px_rgba(236,72,153,0.3)]"
                     >
                       {isMovingToVault === item.filename ? 'Securing...' : (
                         <>
@@ -227,6 +249,11 @@ const MediaLibrary = ({ themeColor }) => {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                       Save File
                     </a>
+
+                    <button onClick={() => handleShare(item.filename)} className="px-3 py-2 bg-green-500/20 text-green-400 hover:bg-green-500/30 text-sm rounded-lg transition-colors border border-green-500/30 flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                      Share
+                    </button>
                     
                     <button onClick={() => handleConvert(item.filename, 'mp3')} disabled={converting === item.filename} className="px-4 py-2 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 text-sm rounded-lg transition-colors border border-blue-500/30 disabled:opacity-50">
                       Extract MP3
