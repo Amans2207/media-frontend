@@ -113,6 +113,7 @@ const VideoDownloader = () => {
   const [currentTrack, setCurrentTrack] = useState(null);
   const [transcriptText, setTranscriptText] = useState('');
   const [showTranscript, setShowTranscript] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
   
   const imgRef = useRef(null);
 
@@ -146,6 +147,13 @@ const VideoDownloader = () => {
     const handleDragOver = (e) => e.preventDefault();
     window.addEventListener('drop', handleDrop);
     window.addEventListener('dragover', handleDragOver);
+
+    // PWA Install Prompt Listener
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // Global Keyboard Shortcuts
     const handleKeyDown = (e) => {
@@ -205,6 +213,7 @@ const VideoDownloader = () => {
       window.removeEventListener('dragover', handleDragOver);
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('paste', handlePaste);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
 
@@ -651,6 +660,23 @@ const VideoDownloader = () => {
             Media Downloader Pro
           </h1>
           <p className="mt-2 text-gray-400 text-sm tracking-wide">Premium URL extraction & converting engine.</p>
+          
+          {installPrompt && (
+            <motion.button
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              onClick={async () => {
+                if (!installPrompt) return;
+                installPrompt.prompt();
+                const { outcome } = await installPrompt.userChoice;
+                if (outcome === 'accepted') setInstallPrompt(null);
+              }}
+              className="mt-6 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-full font-bold shadow-lg shadow-purple-500/20 transition-all flex items-center justify-center gap-2 mx-auto text-sm border border-white/10"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              Install App to Home Screen
+            </motion.button>
+          )}
         </div>
 
         {/* Tab Navigation */}
