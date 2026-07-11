@@ -95,6 +95,7 @@ const VideoDownloader = () => {
   
   const [selectedEntries, setSelectedEntries] = useState(new Set());
   const [enableTrim, setEnableTrim] = useState(false);
+  const [trimRange, setTrimRange] = useState([0, 15]);
   
   const [tasks, setTasks] = useState({}); 
   const [isLoading, setIsLoading] = useState(false);
@@ -459,6 +460,11 @@ const VideoDownloader = () => {
         payload.urls = urlsToDownload;
       } else {
         payload.url = url;
+      }
+      
+      if (enableTrim) {
+        payload.trim_start = trimRange[0].toString();
+        payload.trim_end = trimRange[1].toString();
       }
 
       const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/download', payload);
@@ -890,7 +896,7 @@ const VideoDownloader = () => {
                           {enableTrim ? 'Trimmer Enabled' : 'Enable Trimmer'}
                         </button>
                       </div>
-                      <SnippetCutter url={videoInfo.url || url} themeColor={themeColor} durationStr={videoInfo.duration} />
+                      <SnippetCutter url={videoInfo.url || url} themeColor={themeColor} durationStr={videoInfo.duration} range={trimRange} setRange={setTrimRange} />
                     </div>
                   )}
                 </AnimatePresence>
@@ -906,6 +912,21 @@ const VideoDownloader = () => {
                       style={{ backgroundColor: themeColor }}
                     >
                       Start {activeTab === 'playlist' ? 'Batch ' : ''}Download
+                    </motion.button>
+                  </div>
+                )}
+                
+                {enableTrim && (
+                  <div className="flex gap-3 mt-4">
+                    <button onClick={reset} className="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors font-medium">Back</button>
+                    <motion.button
+                      onClick={startDownload}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="flex-1 py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+                      style={{ backgroundColor: themeColor }}
+                    >
+                      Download Snippet
                     </motion.button>
                   </div>
                 )}
