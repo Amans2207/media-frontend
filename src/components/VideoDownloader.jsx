@@ -120,6 +120,7 @@ const VideoDownloader = () => {
   const [url, setUrl] = useState('');
   const [batchUrls, setBatchUrls] = useState('');
   const [quality, setQuality] = useState('best');
+  const [lofiSpeed, setLofiSpeed] = useState(0.85);
   const [step, setStep] = useState(1);
   const [videoInfo, setVideoInfo] = useState(null);
   
@@ -448,7 +449,7 @@ const VideoDownloader = () => {
     setIsLoading(true);
     try {
       const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/download', {
-        urls, quality
+        urls, quality, ...(quality === 'lofi_audio' && { lofi_speed: lofiSpeed })
       });
       
       const initialTasks = {};
@@ -482,6 +483,9 @@ const VideoDownloader = () => {
     setIsLoading(true);
     try {
       let payload = { quality };
+      if (quality === 'lofi_audio') {
+        payload.lofi_speed = lofiSpeed;
+      }
       
       if (videoInfo.is_playlist) {
         const urlsToDownload = videoInfo.entries.filter(en => selectedEntries.has(en.id)).map(en => en.url);
@@ -792,6 +796,24 @@ const VideoDownloader = () => {
                   <option value="8d_audio" className="bg-gray-900">8D, Bass & Stereo (MP3)</option>
                   <option value="lofi_audio" className="bg-gray-900">Slowed & Reverb (Lofi MP3)</option>
                 </select>
+                {quality === 'lofi_audio' && (
+                  <div className="mt-4 bg-black/30 p-3 rounded-xl border border-white/5">
+                    <label className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2 block px-2">Speed (Playback Rate): {lofiSpeed}x</label>
+                    <input 
+                      type="range" 
+                      min="0.5" max="1.5" step="0.05" 
+                      value={lofiSpeed} 
+                      onChange={(e) => setLofiSpeed(parseFloat(e.target.value))}
+                      className="w-full"
+                      style={{ accentColor: themeColor }}
+                    />
+                    <div className="flex justify-between text-[10px] text-gray-500 px-2 mt-1">
+                      <span>Very Slow</span>
+                      <span>Normal</span>
+                      <span>Fast</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             <motion.button 
@@ -918,6 +940,24 @@ const VideoDownloader = () => {
                   <option value="8d_audio" className="bg-gray-900">8D, Bass & Stereo (MP3)</option>
                   <option value="lofi_audio" className="bg-gray-900">Slowed & Reverb (Lofi MP3)</option>
                   </select>
+                  {quality === 'lofi_audio' && (
+                    <div className="mt-4 bg-black/30 p-3 rounded-xl border border-white/5">
+                      <label className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2 block px-2">Speed (Playback Rate): {lofiSpeed}x</label>
+                      <input 
+                        type="range" 
+                        min="0.5" max="1.5" step="0.05" 
+                        value={lofiSpeed} 
+                        onChange={(e) => setLofiSpeed(parseFloat(e.target.value))}
+                        className="w-full"
+                        style={{ accentColor: themeColor }}
+                      />
+                      <div className="flex justify-between text-[10px] text-gray-500 px-2 mt-1">
+                        <span>Very Slow</span>
+                        <span>Normal</span>
+                        <span>Fast</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {!videoInfo.is_playlist && (activeTab === 'youtube' || activeTab === 'instagram') && (
