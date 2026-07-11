@@ -789,6 +789,7 @@ const VideoDownloader = () => {
                   <option value="best" className="bg-gray-900">Highest Quality</option>
                   <option value="720p" className="bg-gray-900">720p</option>
                   <option value="audio" className="bg-gray-900">Audio Only (MP3/M4A)</option>
+                  <option value="8d_audio" className="bg-gray-900">8D & Bass Boost (MP3)</option>
                 </select>
               </div>
             </div>
@@ -913,6 +914,7 @@ const VideoDownloader = () => {
                     <option value="best" className="bg-gray-900">Highest Quality (Video + Audio)</option>
                     <option value="720p" className="bg-gray-900">720p (Good Quality)</option>
                     <option value="audio" className="bg-gray-900">Audio Only (MP3/M4A)</option>
+                  <option value="8d_audio" className="bg-gray-900">8D & Bass Boost (MP3)</option>
                   </select>
                 </div>
 
