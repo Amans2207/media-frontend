@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import SnippetCutter from './SnippetCutter';
@@ -28,7 +28,7 @@ const PLATFORM_THEMES = {
   batch: { color: '#22c55e' }
 };
 
-const BackgroundElements = ({ themeColor, mousePosition }) => {
+const BackgroundElements = ({ themeColor }) => {
   // Generate random particles once
   const [particles] = useState(() => Array.from({ length: 30 }).map((_, i) => ({
     id: i,
@@ -37,6 +37,20 @@ const BackgroundElements = ({ themeColor, mousePosition }) => {
     duration: Math.random() * 30 + 20,
     delay: Math.random() * -30,
   })));
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { damping: 40, stiffness: 100 });
+  const springY = useSpring(mouseY, { damping: 40, stiffness: 100 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      mouseX.set((e.clientX - window.innerWidth / 2) / 20);
+      mouseY.set((e.clientY - window.innerHeight / 2) / 20);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
 
   return (
     <>
@@ -93,10 +107,8 @@ const BackgroundElements = ({ themeColor, mousePosition }) => {
 
       {/* Mouse Parallax Follower (Interactive Glow) */}
       <motion.div
-        animate={{ x: mousePosition.x, y: mousePosition.y }}
-        transition={{ type: 'spring', damping: 40, stiffness: 100 }}
+        style={{ x: springX, y: springY, backgroundColor: themeColor }}
         className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[160px] pointer-events-none opacity-40 mix-blend-screen transition-colors duration-1000 z-0"
-        style={{ backgroundColor: themeColor }}
       />
     </>
   );
@@ -115,6 +127,7 @@ const VideoDownloader = () => {
   const [pinCode, setPinCode] = useState('');
   const [currentPin, setCurrentPin] = useState('2026');
   const [pinProgress, setPinProgress] = useState(100);
+  const [unlockSuccess, setUnlockSuccess] = useState(false);
   
   const [selectedEntries, setSelectedEntries] = useState(new Set());
   const [enableTrim, setEnableTrim] = useState(false);
@@ -130,7 +143,6 @@ const VideoDownloader = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   
   // UI/UX state
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [themeKey, setThemeKey] = useState('starboy');
   const [themeColor, setThemeColor] = useState(AESTHETICS.starboy.color);
   const [showHistorySidebar, setShowHistorySidebar] = useState(false);
@@ -150,14 +162,7 @@ const VideoDownloader = () => {
       try { setHistory(JSON.parse(saved)); } catch (e) {}
     }
 
-    // Mouse Parallax Hook
-    const handleMouseMove = (e) => {
-      setMousePosition({
-        x: (e.clientX - window.innerWidth / 2) / 20,
-        y: (e.clientY - window.innerHeight / 2) / 20
-      });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
+    // Mouse logic moved to BackgroundElements for performance
 
     // Global Drag & Drop for URLs
     const handleDrop = (e) => {
@@ -232,7 +237,6 @@ const VideoDownloader = () => {
     }
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('drop', handleDrop);
       window.removeEventListener('dragover', handleDragOver);
       window.removeEventListener('keydown', handleKeyDown);
@@ -599,9 +603,12 @@ const VideoDownloader = () => {
   const handlePinSubmit = (e) => {
     e.preventDefault();
     if (pinCode === currentPin) {
-      setIsAuthenticated(true);
+      setUnlockSuccess(true);
       playDing();
       toast.success('Access Granted!');
+      setTimeout(() => {
+        setIsAuthenticated(true);
+      }, 1000);
     } else {
       toast.error('Invalid PIN');
       setPinCode('');
@@ -611,7 +618,7 @@ const VideoDownloader = () => {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#030014] text-white relative flex items-center justify-center p-4 overflow-hidden">
-        <BackgroundElements themeColor={themeColor} mousePosition={mousePosition} />
+        <BackgroundElements themeColor={themeColor} />
         <div className="relative z-10 w-full max-w-sm p-8 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-2xl text-center">
           <div className="w-20 h-20 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-500/30">
             <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
@@ -637,8 +644,8 @@ const VideoDownloader = () => {
               maxLength={4}
               required
             />
-            <button type="submit" className="w-full py-4 rounded-2xl font-bold text-lg bg-purple-600 hover:bg-purple-500 transition-colors shadow-lg">
-              Unlock
+            <button disabled={unlockSuccess} type="submit" className={`w-full py-4 rounded-2xl font-bold text-lg transition-colors shadow-lg ${unlockSuccess ? 'bg-green-500 text-white' : 'bg-purple-600 hover:bg-purple-500'}`}>
+              {unlockSuccess ? 'Unlocking...' : 'Unlock'}
             </button>
           </form>
         </div>
@@ -648,7 +655,7 @@ const VideoDownloader = () => {
 
   return (
     <div className="min-h-screen bg-[#030014] text-white relative font-sans overflow-x-hidden selection:bg-purple-500/30 selection:text-white flex flex-col items-center pt-12 md:pt-20 px-4 pb-20">
-      <BackgroundElements themeColor={themeColor} mousePosition={mousePosition} />
+      <BackgroundElements themeColor={themeColor} />
       {showConfetti && <Confetti recycle={false} numberOfPieces={800} gravity={0.15} colors={['#9333ea', '#ec4899', '#3b82f6', '#22c55e']} style={{ zIndex: 100 }} />}
       
       <Toaster position="bottom-center" toastOptions={{ 
