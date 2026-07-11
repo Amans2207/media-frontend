@@ -168,7 +168,7 @@ const MediaLibrary = ({ themeColor }) => {
     }
   };
 
-  if (history.length === 0 && activeTab === 'history') return null;
+  // if (history.length === 0 && activeTab === 'history') return null;
 
   return (
     <div className="mt-12 bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative overflow-hidden">
@@ -209,7 +209,13 @@ const MediaLibrary = ({ themeColor }) => {
               <svg className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
               <span><strong>Auto-Delete Notice:</strong> Videos stored on the server will be automatically deleted after 30 minutes to free up space. Please use the <strong>Move to Vault</strong> button to permanently secure them in your browser's local memory.</span>
             </motion.div>
-            {history.map((item, idx) => (
+            {history.length === 0 ? (
+              <motion.div initial={{opacity:0}} animate={{opacity:1}} className="flex-1 flex flex-col items-center justify-center py-10 opacity-50 text-center">
+                <svg className="w-16 h-16 mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                <p>No recent downloads.</p>
+              </motion.div>
+            ) : (
+              history.map((item, idx) => (
               <motion.div 
                 key={`${item.filename}-${idx}`}
                 initial={{ opacity: 0, y: 20 }}
@@ -271,7 +277,8 @@ const MediaLibrary = ({ themeColor }) => {
                   </div>
                 </div>
               </motion.div>
-            ))}
+            ))
+            )}
           </AnimatePresence>
         )}
 
