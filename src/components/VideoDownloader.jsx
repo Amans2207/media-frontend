@@ -117,7 +117,7 @@ const VideoDownloader = () => {
   const imgRef = useRef(null);
 
   useEffect(() => {
-    axios.get('https://media-backend-production-b846.up.railway.app/api/network')
+    axios.get('https://frugality-unhidden-tibia.ngrok-free.dev/api/network')
       .then(res => setNetworkIp(res.data.ip))
       .catch(e => console.log(e));
     const saved = localStorage.getItem('vd_history');
@@ -213,10 +213,10 @@ const VideoDownloader = () => {
   const handlePodcastAction = async (filename, thumbnail) => {
     setConverting(filename);
     try {
-      const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/visualizer', { filename, thumbnail });
+      const res = await axios.post('https://frugality-unhidden-tibia.ngrok-free.dev/api/visualizer', { filename, thumbnail });
       const newFilename = res.data.filename;
       const link = document.createElement('a');
-      link.href = `https://media-backend-production-b846.up.railway.app/api/serve/${newFilename}`;
+      link.href = `https://frugality-unhidden-tibia.ngrok-free.dev/api/serve/${newFilename}`;
       link.download = newFilename;
       document.body.appendChild(link);
       link.click();
@@ -232,10 +232,10 @@ const VideoDownloader = () => {
   const handleSubtitleAction = async (url) => {
     try {
       toast.loading('Extracting subtitles...', { id: 'subs' });
-      const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/subtitles', { url });
+      const res = await axios.post('https://frugality-unhidden-tibia.ngrok-free.dev/api/subtitles', { url });
       const newFilename = res.data.filename;
       const link = document.createElement('a');
-      link.href = `https://media-backend-production-b846.up.railway.app/api/serve/${newFilename}`;
+      link.href = `https://frugality-unhidden-tibia.ngrok-free.dev/api/serve/${newFilename}`;
       link.download = newFilename;
       document.body.appendChild(link);
       link.click();
@@ -249,10 +249,10 @@ const VideoDownloader = () => {
   const handleConvertAction = async (filename, format) => {
     setConverting(filename);
     try {
-      const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/convert', { filename, format });
+      const res = await axios.post('https://frugality-unhidden-tibia.ngrok-free.dev/api/convert', { filename, format });
       const newFilename = res.data.filename;
       const link = document.createElement('a');
-      link.href = `https://media-backend-production-b846.up.railway.app/api/serve/${newFilename}`;
+      link.href = `https://frugality-unhidden-tibia.ngrok-free.dev/api/serve/${newFilename}`;
       link.download = newFilename;
       document.body.appendChild(link);
       link.click();
@@ -268,7 +268,7 @@ const VideoDownloader = () => {
   const handleReadTranscript = async (url) => {
     try {
       toast.loading('AI is reading the video...', { id: 'read' });
-      const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/transcript', { url });
+      const res = await axios.post('https://frugality-unhidden-tibia.ngrok-free.dev/api/transcript', { url });
       setTranscriptText(res.data.transcript);
       setShowTranscript(true);
       toast.success('Transcript loaded!', { id: 'read' });
@@ -278,7 +278,7 @@ const VideoDownloader = () => {
   };
 
   const handleNativeShare = async (filename, title) => {
-    const shareUrl = `https://media-backend-production-b846.up.railway.app/api/serve/${filename}`;
+    const shareUrl = `https://frugality-unhidden-tibia.ngrok-free.dev/api/serve/${filename}`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -348,9 +348,9 @@ const VideoDownloader = () => {
 
   const handleDeleteHistory = async (link) => {
     try {
-      // Extract filename from the link (e.g., https://media-backend-production-b846.up.railway.app/api/serve/filename.mp4)
+      // Extract filename from the link (e.g., https://frugality-unhidden-tibia.ngrok-free.dev/api/serve/filename.mp4)
       const filename = link.split('/').pop();
-      await axios.delete(`https://media-backend-production-b846.up.railway.app/api/delete/${filename}`);
+      await axios.delete(`https://frugality-unhidden-tibia.ngrok-free.dev/api/delete/${filename}`);
       toast.success('File deleted from server!');
     } catch (e) {
       console.log('Delete error:', e);
@@ -369,7 +369,7 @@ const VideoDownloader = () => {
     setStep(1.5); // Show Skeleton
     
     try {
-      const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/info', { url });
+      const res = await axios.post('https://frugality-unhidden-tibia.ngrok-free.dev/api/info', { url });
       setVideoInfo(res.data);
       if (res.data.is_playlist) {
         if (activeTab !== 'playlist') setActiveTab('playlist');
@@ -392,7 +392,7 @@ const VideoDownloader = () => {
     
     setIsLoading(true);
     try {
-      const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/download', {
+      const res = await axios.post('https://frugality-unhidden-tibia.ngrok-free.dev/api/download', {
         urls, quality
       });
       
@@ -440,7 +440,7 @@ const VideoDownloader = () => {
         payload.url = url;
       }
 
-      const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/download', payload);
+      const res = await axios.post('https://frugality-unhidden-tibia.ngrok-free.dev/api/download', payload);
       
       const initialTasks = {};
       res.data.tasks.forEach(tid => {
@@ -462,7 +462,7 @@ const VideoDownloader = () => {
     while (active.length > 0) {
       for (let tid of active) {
         try {
-          const res = await axios.get(`https://media-backend-production-b846.up.railway.app/api/progress/${tid}`);
+          const res = await axios.get(`https://frugality-unhidden-tibia.ngrok-free.dev/api/progress/${tid}`);
           const data = res.data;
           
           setTasks(prev => {
@@ -486,7 +486,7 @@ const VideoDownloader = () => {
             });
             window.dispatchEvent(customEvent);
             
-            const link = `https://media-backend-production-b846.up.railway.app/api/serve/${data.filename}`;
+            const link = `https://frugality-unhidden-tibia.ngrok-free.dev/api/serve/${data.filename}`;
             let title = videoInfo.title;
             let thumb = videoInfo.thumbnail;
             if (videoInfo.is_playlist) {
@@ -624,7 +624,7 @@ const VideoDownloader = () => {
               <p className="text-sm text-gray-400 mb-6">Scan this QR Code with your phone's camera to download the file directly. Ensure you are on the same Wi-Fi network.</p>
               
               <div className="p-4 bg-white rounded-2xl shadow-inner">
-                <QRCodeSVG value={`https://media-backend-production-b846.up.railway.app/api/serve/${showQR}`} size={200} />
+                <QRCodeSVG value={`https://frugality-unhidden-tibia.ngrok-free.dev/api/serve/${showQR}`} size={200} />
               </div>
             </motion.div>
           </motion.div>
@@ -767,9 +767,9 @@ const VideoDownloader = () => {
                          onClick={async () => {
                            try {
                              toast.loading('Extracting Subtitles...', { id: 'subs' });
-                             const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/subtitles', { url: videoInfo.url || url });
+                             const res = await axios.post('https://frugality-unhidden-tibia.ngrok-free.dev/api/subtitles', { url: videoInfo.url || url });
                              const link = document.createElement('a');
-                             link.href = `https://media-backend-production-b846.up.railway.app/api/serve/${res.data.filename}`;
+                             link.href = `https://frugality-unhidden-tibia.ngrok-free.dev/api/serve/${res.data.filename}`;
                              link.download = res.data.filename;
                              link.click();
                              toast.success('Subtitles Downloaded!', { id: 'subs' });
@@ -911,7 +911,7 @@ const VideoDownloader = () => {
                         {/* Mini Video Player Preview */}
                         <div className="w-full bg-black/60 rounded-xl overflow-hidden border border-white/10 mb-2 shadow-inner">
                           <video 
-                            src={`https://media-backend-production-b846.up.railway.app/api/serve/${data.filename}`} 
+                            src={`https://frugality-unhidden-tibia.ngrok-free.dev/api/serve/${data.filename}`} 
                             autoPlay 
                             muted 
                             loop 
@@ -956,7 +956,7 @@ const VideoDownloader = () => {
                           
                           <button onClick={() => handleConvertAction(data.filename, 'gif')} disabled={converting === data.filename} className="px-4 py-2 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-lg text-sm border border-purple-500/30 disabled:opacity-50 font-medium">Make 15s GIF</button>
                           
-                          <a href={`https://media-backend-production-b846.up.railway.app/api/serve/${data.filename}`} download className="px-6 py-2 bg-green-500 hover:bg-green-600 transition-colors rounded-lg text-sm font-bold text-white shadow-lg flex items-center gap-2 ml-auto">
+                          <a href={`https://frugality-unhidden-tibia.ngrok-free.dev/api/serve/${data.filename}`} download className="px-6 py-2 bg-green-500 hover:bg-green-600 transition-colors rounded-lg text-sm font-bold text-white shadow-lg flex items-center gap-2 ml-auto">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                             Save to Disk
                           </a>
