@@ -58,28 +58,28 @@ const BackgroundElements = ({ themeColor }) => {
       {/* Deep Space Abstract Base */}
       <div className="fixed inset-0 pointer-events-none z-0 bg-[#08080c]" />
 
-      {/* Dynamic Animated Aurora Mesh Gradient Orbs */}
+      {/* Dynamic Animated Aurora Mesh Gradient Orbs (Optimized without blur) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-60">
         {/* Top Left Orb */}
         <motion.div
           animate={{ x: [0, '10vw', '-5vw', 0], y: [0, '-5vh', '10vh', 0], scale: [1, 1.2, 0.9, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[20%] -left-[10%] w-[60vw] h-[60vw] rounded-full blur-[120px] mix-blend-screen transition-colors duration-1000"
-          style={{ backgroundColor: themeColor }}
+          className="absolute -top-[20%] -left-[10%] w-[60vw] h-[60vw] rounded-full transition-colors duration-1000"
+          style={{ backgroundImage: `radial-gradient(circle at center, ${themeColor} 0%, transparent 70%)` }}
         />
         {/* Bottom Right Orb */}
         <motion.div
           animate={{ x: [0, '-10vw', '5vw', 0], y: [0, '10vh', '-5vh', 0], scale: [1, 0.8, 1.1, 1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear", delay: 2 }}
-          className="absolute -bottom-[20%] -right-[10%] w-[50vw] h-[50vw] rounded-full blur-[150px] mix-blend-screen transition-colors duration-1000"
-          style={{ backgroundColor: themeColor, opacity: 0.5 }}
+          className="absolute -bottom-[20%] -right-[10%] w-[50vw] h-[50vw] rounded-full transition-colors duration-1000"
+          style={{ backgroundImage: `radial-gradient(circle at center, ${themeColor} 0%, transparent 70%)`, opacity: 0.5 }}
         />
         {/* Center Accent Orb */}
         <motion.div
           animate={{ x: [0, '5vw', '-10vw', 0], y: [0, '5vh', '-5vh', 0], scale: [1, 1.5, 0.9, 1] }}
           transition={{ duration: 30, repeat: Infinity, ease: "linear", delay: 5 }}
-          className="absolute top-[30%] right-[20%] w-[40vw] h-[40vw] rounded-full blur-[120px] mix-blend-screen transition-colors duration-1000"
-          style={{ backgroundColor: '#be185d', opacity: 0.3 }} 
+          className="absolute top-[30%] right-[20%] w-[40vw] h-[40vw] rounded-full transition-colors duration-1000"
+          style={{ backgroundImage: `radial-gradient(circle at center, #be185d 0%, transparent 70%)`, opacity: 0.3 }}
         />
       </div>
 
@@ -106,10 +106,10 @@ const BackgroundElements = ({ themeColor }) => {
         ))}
       </div>
 
-      {/* Mouse Parallax Follower (Interactive Glow) */}
+      {/* Mouse Parallax Follower (Interactive Glow) - Optimized */}
       <motion.div
-        style={{ x: springX, y: springY, backgroundColor: themeColor }}
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[160px] pointer-events-none opacity-40 mix-blend-screen transition-colors duration-1000 z-0"
+        style={{ x: springX, y: springY, backgroundImage: `radial-gradient(circle at center, ${themeColor} 0%, transparent 60%)` }}
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none opacity-30 transition-colors duration-1000 z-0"
       />
     </>
   );
