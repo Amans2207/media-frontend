@@ -30,50 +30,73 @@ const PLATFORM_THEMES = {
 
 const BackgroundElements = ({ themeColor, mousePosition }) => {
   // Generate random particles once
-  const [particles] = useState(() => Array.from({ length: 40 }).map((_, i) => ({
+  const [particles] = useState(() => Array.from({ length: 30 }).map((_, i) => ({
     id: i,
-    size: Math.random() * 4 + 1,
+    size: Math.random() * 3 + 1,
     left: Math.random() * 100,
-    duration: Math.random() * 20 + 15,
-    delay: Math.random() * -20, // Negative delay so they start already on screen
+    duration: Math.random() * 30 + 20,
+    delay: Math.random() * -30,
   })));
 
   return (
     <>
+      {/* Deep Space Abstract Base */}
+      <div className="fixed inset-0 pointer-events-none z-0 bg-[#08080c]" />
+
+      {/* Dynamic Animated Aurora Mesh Gradient Orbs */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-60">
+        {/* Top Left Orb */}
+        <motion.div
+          animate={{ x: [0, '10vw', '-5vw', 0], y: [0, '-5vh', '10vh', 0], scale: [1, 1.2, 0.9, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[20%] -left-[10%] w-[60vw] h-[60vw] rounded-full blur-[120px] mix-blend-screen transition-colors duration-1000"
+          style={{ backgroundColor: themeColor }}
+        />
+        {/* Bottom Right Orb */}
+        <motion.div
+          animate={{ x: [0, '-10vw', '5vw', 0], y: [0, '10vh', '-5vh', 0], scale: [1, 0.8, 1.1, 1] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear", delay: 2 }}
+          className="absolute -bottom-[20%] -right-[10%] w-[50vw] h-[50vw] rounded-full blur-[150px] mix-blend-screen transition-colors duration-1000"
+          style={{ backgroundColor: themeColor, opacity: 0.5 }}
+        />
+        {/* Center Accent Orb */}
+        <motion.div
+          animate={{ x: [0, '5vw', '-10vw', 0], y: [0, '5vh', '-5vh', 0], scale: [1, 1.5, 0.9, 1] }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear", delay: 5 }}
+          className="absolute top-[30%] right-[20%] w-[40vw] h-[40vw] rounded-full blur-[120px] mix-blend-screen transition-colors duration-1000"
+          style={{ backgroundColor: '#be185d', opacity: 0.3 }} 
+        />
+      </div>
+
+      {/* Grain/Noise Overlay for ultra-premium Frosted Glass texture */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.05]" 
+        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}
+      />
+
       {/* Subtle Dot Grid */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at center, #ffffff 1.5px, transparent 1.5px)', backgroundSize: '40px 40px' }} />
-      
-      {/* Floating Particles */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.15] mix-blend-overlay" style={{ backgroundImage: 'radial-gradient(circle at center, #ffffff 1.5px, transparent 1.5px)', backgroundSize: '40px 40px' }} />
+
+      {/* Floating Particles (Stardust) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-50">
         {particles.map(p => (
           <motion.div
             key={p.id}
-            className="absolute rounded-full"
-            style={{
-              width: p.size,
-              height: p.size,
-              left: `${p.left}%`,
-              backgroundColor: themeColor,
-              boxShadow: `0 0 15px ${themeColor}`
-            }}
+            className="absolute rounded-full bg-white"
+            style={{ width: p.size, height: p.size, left: `${p.left}%`, boxShadow: '0 0 10px rgba(255,255,255,0.8)' }}
             initial={{ y: '110vh', opacity: 0 }}
-            animate={{ y: '-10vh', opacity: [0, 0.8, 0] }}
+            animate={{ y: '-10vh', opacity: [0, Math.random() * 0.5 + 0.3, 0] }}
             transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: 'linear' }}
           />
         ))}
       </div>
 
-      {/* Mouse Parallax Background Orbs */}
-      <motion.div 
+      {/* Mouse Parallax Follower (Interactive Glow) */}
+      <motion.div
         animate={{ x: mousePosition.x, y: mousePosition.y }}
         transition={{ type: 'spring', damping: 40, stiffness: 100 }}
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[180px] pointer-events-none opacity-30 transition-colors duration-1000 z-0"
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[160px] pointer-events-none opacity-40 mix-blend-screen transition-colors duration-1000 z-0"
         style={{ backgroundColor: themeColor }}
-      />
-      <motion.div 
-        animate={{ x: mousePosition.x * -1, y: mousePosition.y * -1 }}
-        transition={{ type: 'spring', damping: 50, stiffness: 80 }}
-        className="fixed top-1/3 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[150px] pointer-events-none opacity-20 z-0"
       />
     </>
   );
