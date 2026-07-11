@@ -387,9 +387,14 @@ const VideoDownloader = () => {
   const handleFetchInfo = async (e) => {
     e?.preventDefault();
     if (!url) return;
+    
+    if (url.includes('instagram.com/stories/')) {
+      toast.error('Instagram Stories require login cookies which are blocked for privacy. Please use Reels or Posts.', { duration: 6000 });
+      return;
+    }
+
     setIsLoading(true);
     setStep(1.5); // Show Skeleton
-    
     try {
       const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/info', { url });
       setVideoInfo(res.data);
