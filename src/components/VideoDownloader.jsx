@@ -1037,6 +1037,8 @@ const VideoDownloader = () => {
             )}
           </motion.div>
         )}
+        
+        <MediaLibrary themeColor={themeColor} />
       </div>
 
       {/* Floating Theme Switcher */}
@@ -1051,72 +1053,6 @@ const VideoDownloader = () => {
           />
         ))}
       </div>
-
-      {/* Floating History Toggle Button */}
-      <motion.button 
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setShowHistorySidebar(true)}
-        className="fixed bottom-6 right-6 z-40 bg-white/10 backdrop-blur-xl border border-white/20 text-white p-4 rounded-full shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:bg-white/20 transition-all flex items-center justify-center group"
-      >
-        <svg className="w-6 h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        {history.length > 0 && <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border border-black animate-pulse" />}
-      </motion.button>
-
-      {/* Slide-out History Sidebar */}
-      <AnimatePresence>
-        {showHistorySidebar && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setShowHistorySidebar(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-            />
-            <motion.div 
-              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-full max-w-md bg-gray-900/90 backdrop-blur-2xl border-l border-white/10 z-50 p-6 shadow-2xl overflow-y-auto custom-scrollbar flex flex-col"
-            >
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xl font-bold flex items-center gap-2">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  Download History
-                </h3>
-                <button onClick={() => setShowHistorySidebar(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-              </div>
-
-              {history.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center opacity-50 text-center">
-                  <svg className="w-16 h-16 mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                  <p>No recent downloads.</p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {history.map((h, i) => (
-                    <div key={i} className="flex gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-colors group">
-                      <img src={h.thumbnail} className="w-20 h-20 rounded-xl object-cover shadow-md" />
-                      <div className="flex-1 min-w-0 flex flex-col">
-                        <h4 className="text-sm font-bold truncate text-gray-100 group-hover:text-purple-300 transition-colors mb-1">{h.title}</h4>
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-black/40 text-gray-400 rounded-md border border-white/5 w-max mb-2">{h.platform}</span>
-                        <div className="flex items-center gap-2 mt-auto">
-                          <a href={h.link} className="text-xs font-bold transition-colors w-max px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: themeColor }} download>Redownload</a>
-                          {h.link.endsWith('.mp3') || h.link.endsWith('.m4a') ? (
-                            <button onClick={() => setCurrentTrack(h.link)} className="text-xs font-bold transition-colors w-max px-3 py-1.5 rounded-lg bg-pink-500 hover:bg-pink-600 text-white shadow-lg">Play Audio</button>
-                          ) : null}
-                          <button onClick={() => handleDeleteHistory(h.link)} className="p-1.5 bg-red-500/20 text-red-500 hover:bg-red-500/40 rounded-lg transition-colors border border-red-500/30 ml-auto" title="Delete from Server">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       {/* Transcript Modal */}
       <AnimatePresence>
