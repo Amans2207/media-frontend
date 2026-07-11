@@ -178,13 +178,25 @@ const VideoDownloader = () => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('paste', handlePaste);
 
-    // Extension Integration (Read ?url= param)
+    // Extension & PWA Share Target Integration (Read ?url= or ?text= params)
     const params = new URLSearchParams(window.location.search);
     const extUrl = params.get('url');
-    if (extUrl) {
-      setUrl(extUrl);
+    const extText = params.get('text');
+    const extTitle = params.get('title');
+    
+    // Find first http/https link in any of the parameters
+    const findUrl = (str) => {
+      if (!str) return null;
+      const match = str.match(/(https?:\/\/[^\s]+)/);
+      return match ? match[1] : null;
+    };
+    
+    const sharedUrl = findUrl(extUrl) || findUrl(extText) || findUrl(extTitle);
+
+    if (sharedUrl) {
+      setUrl(sharedUrl);
       window.history.replaceState({}, document.title, "/");
-      toast.success("URL loaded from Extension! Click Analyze.");
+      toast.success("Link received! Click Analyze to start.");
     }
 
     return () => {
