@@ -1043,7 +1043,7 @@ const VideoDownloader = () => {
                           
                           <button onClick={() => handleConvertAction(data.filename, 'gif')} disabled={converting === data.filename} className="px-4 py-2 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-lg text-sm border border-purple-500/30 disabled:opacity-50 font-medium">Make 15s GIF</button>
                           
-                          <a href={`https://media-backend-production-b846.up.railway.app/api/serve/${data.filename}`} download className="px-6 py-2 bg-green-500 hover:bg-green-600 transition-colors rounded-lg text-sm font-bold text-white shadow-lg flex items-center gap-2 ml-auto">
+                          <a href={`https://media-backend-production-b846.up.railway.app/api/serve/${data.filename}`} target="_blank" rel="noopener noreferrer" download className="px-6 py-2 bg-green-500 hover:bg-green-600 transition-colors rounded-lg text-sm font-bold text-white shadow-lg flex items-center gap-2 ml-auto">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                             Save to Disk
                           </a>
