@@ -12,7 +12,17 @@ const MediaLibrary = ({ themeColor }) => {
     // Load history from localStorage
     const saved = localStorage.getItem('media_history');
     if (saved) {
-      try { setHistory(JSON.parse(saved).reverse()); } 
+      try { 
+        let parsed = JSON.parse(saved);
+        // Filter out items older than 30 minutes (1800000 ms) to match backend auto-cleanup
+        const now = Date.now();
+        parsed = parsed.filter(item => {
+          const itemTime = new Date(item.timestamp).getTime();
+          return (now - itemTime) < 1800000;
+        });
+        localStorage.setItem('media_history', JSON.stringify(parsed));
+        setHistory(parsed.reverse()); 
+      }
       catch (e) { console.error('Failed to parse history'); }
     }
     
@@ -26,7 +36,27 @@ const MediaLibrary = ({ themeColor }) => {
     };
     
     window.addEventListener('new_download_completed', handleNewTask);
-    return () => window.removeEventListener('new_download_completed', handleNewTask);
+    
+    // Active UI Cleanup: Check every minute and remove expired UI items
+    const interval = setInterval(() => {
+        const currentSaved = localStorage.getItem('media_history');
+        if (currentSaved) {
+            try {
+                let parsed = JSON.parse(currentSaved);
+                const now = Date.now();
+                const filtered = parsed.filter(item => (now - new Date(item.timestamp).getTime()) < 1800000);
+                if (filtered.length !== parsed.length) {
+                    localStorage.setItem('media_history', JSON.stringify(filtered));
+                    setHistory(filtered.reverse());
+                }
+            } catch (e) {}
+        }
+    }, 60000);
+
+    return () => {
+        window.removeEventListener('new_download_completed', handleNewTask);
+        clearInterval(interval);
+    };
   }, []);
 
   const closePlayer = () => {
