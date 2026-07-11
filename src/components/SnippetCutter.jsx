@@ -43,10 +43,10 @@ const SnippetCutter = ({ url, themeColor, durationStr }) => {
         end_time: range[1].toString()
       };
 
-      const res = await axios.post('https://frugality-unhidden-tibia.ngrok-free.dev/api/trim', payload);
+      const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/trim', payload);
       const filename = res.data.filename;
       
-      const link = `https://frugality-unhidden-tibia.ngrok-free.dev/api/serve/${filename}`;
+      const link = `https://media-backend-production-b846.up.railway.app/api/serve/${filename}`;
       setDownloadLink(link);
       toast.success('Snippet successfully processed!');
       
