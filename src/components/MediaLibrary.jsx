@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const MediaLibrary = ({ themeColor }) => {
+const MediaLibrary = ({ themeColor, setCurrentTrack, playlist }) => {
   const [history, setHistory] = useState([]);
   const [playingFile, setPlayingFile] = useState(null);
   const [converting, setConverting] = useState(null);
@@ -142,10 +142,27 @@ const MediaLibrary = ({ themeColor }) => {
               exit={{ opacity: 0, scale: 0.95 }}
               className="bg-black/30 border border-white/5 rounded-2xl overflow-hidden flex flex-col md:flex-row"
             >
-              <div className="md:w-1/3 relative group cursor-pointer" onClick={() => setPlayingFile(item.filename)}>
+              <div className="md:w-1/3 relative group cursor-pointer" onClick={() => {
+                if (item.filename && (item.filename.endsWith('.mp3') || item.filename.endsWith('.m4a'))) {
+                  if (setCurrentTrack) {
+                    setCurrentTrack({
+                      id: item.filename,
+                      title: item.title,
+                      thumbnail: item.thumbnail,
+                      url: `https://media-backend-production-b846.up.railway.app/api/serve/${item.filename}`
+                    });
+                  }
+                } else {
+                  setPlayingFile(item.filename);
+                }
+              }}>
                 <img src={item.thumbnail || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=500"} alt="Thumb" className="w-full h-full object-cover min-h-[120px]" />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                   <svg className="w-12 h-12 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
+                   {item.filename && (item.filename.endsWith('.mp3') || item.filename.endsWith('.m4a')) ? (
+                     <svg className="w-12 h-12 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/></svg>
+                   ) : (
+                     <svg className="w-12 h-12 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
+                   )}
                 </div>
               </div>
               

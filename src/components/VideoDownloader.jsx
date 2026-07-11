@@ -4,6 +4,7 @@ import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import SnippetCutter from './SnippetCutter';
 import MediaLibrary from './MediaLibrary';
+import GlobalAudioPlayer from './GlobalAudioPlayer';
 import { QRCodeSVG } from 'qrcode.react';
 import Confetti from 'react-confetti';
 import Tilt from 'react-parallax-tilt';
@@ -662,6 +663,15 @@ const VideoDownloader = () => {
         style: { background: '#18181b', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem', backdropFilter: 'blur(10px)' } 
       }} />
 
+      {/* Global Audio Player */}
+      <GlobalAudioPlayer 
+        track={currentTrack} 
+        playlist={history.filter(h => h.filename && (h.filename.endsWith('.mp3') || h.filename.endsWith('.m4a')))}
+        onTrackChange={(track) => setCurrentTrack(track)}
+        onClose={() => setCurrentTrack(null)}
+        themeColor={themeColor}
+      />
+
       {/* QR Code Modal */}
       <AnimatePresence>
         {showQR && (
@@ -1068,7 +1078,13 @@ const VideoDownloader = () => {
           </motion.div>
         )}
         
-        <MediaLibrary themeColor={themeColor} />
+        <div className="w-full">
+          <MediaLibrary 
+             themeColor={themeColor} 
+             setCurrentTrack={setCurrentTrack} 
+             playlist={history.filter(h => h.filename && (h.filename.endsWith('.mp3') || h.filename.endsWith('.m4a')))}
+          />
+        </div>
       </div>
 
       {/* Floating Theme Switcher */}
