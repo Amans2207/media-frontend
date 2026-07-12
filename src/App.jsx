@@ -64,7 +64,7 @@ function App() {
   }
 
   return (
-    <VideoDownloader />
+    <VideoDownloader session={session} />
   );
 }
 

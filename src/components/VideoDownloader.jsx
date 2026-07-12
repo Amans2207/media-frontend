@@ -116,7 +116,9 @@ const BackgroundElements = ({ themeColor }) => {
   );
 };
 
-const VideoDownloader = () => {
+const VideoDownloader = ({ session }) => {
+  const is_pro = session?.user?.user_metadata?.is_pro === true;
+  const [showProModal, setShowProModal] = useState(false);
   const [activeTab, setActiveTab] = useState('youtube'); // youtube, instagram, playlist, batch
   const [url, setUrl] = useState('');
   const [batchUrls, setBatchUrls] = useState('');
@@ -429,6 +431,11 @@ const VideoDownloader = () => {
     e?.preventDefault();
     const urls = batchUrls.split('\n').map(u => u.trim()).filter(u => u.length > 0);
     if (urls.length === 0) return;
+
+    if (['4k', '8d_audio', 'lofi_audio'].includes(quality) && !is_pro) {
+      setShowProModal(true);
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -463,7 +470,14 @@ const VideoDownloader = () => {
     setSelectedEntries(newSet);
   };
 
-  const startDownload = async () => {
+  const startDownload = async (e) => {
+    e?.preventDefault();
+    
+    if (['4k', '8d_audio', 'lofi_audio'].includes(quality) && !is_pro) {
+      setShowProModal(true);
+      return;
+    }
+
     setIsLoading(true);
     try {
       let payload = { quality };
@@ -722,12 +736,12 @@ const VideoDownloader = () => {
               <div className="mt-4">
                 <label className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2 block px-2">Quality</label>
                 <select value={quality} onChange={(e) => setQuality(e.target.value)} className="w-full px-4 py-3 bg-black/50 text-white rounded-xl focus:outline-none cursor-pointer">
-                  <option value="4k" className="bg-gray-900">4K Max (Merged Video+Audio)</option>
+                  <option value="4k" className="bg-gray-900 font-bold text-yellow-400">4K Max (Merged) 👑 PRO</option>
                   <option value="best" className="bg-gray-900">Highest Quality</option>
                   <option value="720p" className="bg-gray-900">720p</option>
                   <option value="audio" className="bg-gray-900">Audio Only (MP3/M4A)</option>
-                  <option value="8d_audio" className="bg-gray-900">8D, Bass & Stereo (MP3)</option>
-                  <option value="lofi_audio" className="bg-gray-900">Slowed & Reverb (Lofi MP3)</option>
+                  <option value="8d_audio" className="bg-gray-900 font-bold text-yellow-400">8D, Bass & Stereo 👑 PRO</option>
+                  <option value="lofi_audio" className="bg-gray-900 font-bold text-yellow-400">Slowed & Reverb 👑 PRO</option>
                 </select>
                 {quality === 'lofi_audio' && (
                   <div className="mt-4 bg-black/30 p-3 rounded-xl border border-white/5">
@@ -866,12 +880,12 @@ const VideoDownloader = () => {
                     onChange={(e) => setQuality(e.target.value)}
                     className="w-full px-4 py-3 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none transition-all cursor-pointer"
                   >
-                    <option value="4k" className="bg-gray-900 font-bold text-yellow-400">🔥 4K Max Quality (Merged)</option>
+                    <option value="4k" className="bg-gray-900 font-bold text-yellow-400">🔥 4K Max Quality (Merged) 👑 PRO</option>
                     <option value="best" className="bg-gray-900">Highest Quality (Video + Audio)</option>
                     <option value="720p" className="bg-gray-900">720p (Good Quality)</option>
                     <option value="audio" className="bg-gray-900">Audio Only (MP3/M4A)</option>
-                  <option value="8d_audio" className="bg-gray-900">8D, Bass & Stereo (MP3)</option>
-                  <option value="lofi_audio" className="bg-gray-900">Slowed & Reverb (Lofi MP3)</option>
+                  <option value="8d_audio" className="bg-gray-900 font-bold text-yellow-400">8D, Bass & Stereo 👑 PRO</option>
+                  <option value="lofi_audio" className="bg-gray-900 font-bold text-yellow-400">Slowed & Reverb 👑 PRO</option>
                   </select>
                   {quality === 'lofi_audio' && (
                     <div className="mt-4 bg-black/30 p-3 rounded-xl border border-white/5">
@@ -1144,6 +1158,77 @@ const VideoDownloader = () => {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                  </button>
              </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* PRO Upgrade Modal */}
+      <AnimatePresence>
+        {showProModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-[#111116] border border-yellow-500/30 rounded-3xl p-8 max-w-md w-full relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-yellow-400 via-yellow-600 to-yellow-400" />
+              
+              <button 
+                onClick={() => setShowProModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-white"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+
+              <div className="text-center mb-6">
+                <span className="text-5xl mb-2 block">👑</span>
+                <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">
+                  Upgrade to PRO
+                </h2>
+                <p className="text-gray-400 mt-2">Unlock the ultimate media experience.</p>
+              </div>
+
+              <div className="space-y-3 mb-6 bg-white/5 rounded-xl p-4 border border-white/5">
+                <div className="flex items-center gap-3 text-gray-300"><span className="text-yellow-400">✓</span> 4K Max Quality (Merged Video)</div>
+                <div className="flex items-center gap-3 text-gray-300"><span className="text-yellow-400">✓</span> 8D, Bass & Stereo Audio</div>
+                <div className="flex items-center gap-3 text-gray-300"><span className="text-yellow-400">✓</span> Slowed & Reverb (Lofi MP3)</div>
+                <div className="flex items-center gap-3 text-gray-300"><span className="text-yellow-400">✓</span> Priority 120fps Download Speeds</div>
+              </div>
+
+              <div className="bg-black/40 rounded-xl p-4 text-center border border-white/5 mb-6">
+                <p className="text-sm text-gray-400 uppercase tracking-widest font-bold mb-1">Subscription Plan</p>
+                <p className="text-3xl font-black text-white">₹49<span className="text-lg text-gray-500 font-medium">/month</span></p>
+                <p className="text-xs text-yellow-500 mt-1 font-medium">Limited time offer!</p>
+              </div>
+
+              <div className="flex flex-col items-center justify-center gap-4 mb-6">
+                <div className="p-2 bg-white rounded-xl">
+                  <QRCodeSVG value="upi://pay?pa=8766083129@ptyes&pn=Media%20Downloader%20Pro&cu=INR" size={150} />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold text-white mb-1">Scan to Pay via any UPI App</p>
+                  <p className="text-xs text-gray-400 font-mono">UPI ID: 8766083129@ptyes</p>
+                </div>
+              </div>
+
+              <div className="bg-purple-900/20 border border-purple-500/20 rounded-xl p-4 text-center">
+                <p className="text-sm text-purple-200 mb-3">After payment, send the screenshot to Admin to activate your account.</p>
+                <a 
+                  href="https://t.me/YourTelegramUsername" 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold transition-colors"
+                >
+                  Contact Admin
+                </a>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
