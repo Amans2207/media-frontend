@@ -125,13 +125,7 @@ const VideoDownloader = () => {
   const [step, setStep] = useState(1);
   const [videoInfo, setVideoInfo] = useState(null);
   
-  // Security State
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('mdp_auth') === 'true';
-  });
-  const [pinCode, setPinCode] = useState('');
-  const [currentPin, setCurrentPin] = useState('2026');
-  const [unlockSuccess, setUnlockSuccess] = useState(false);
+  // Video State
   
   const [selectedEntries, setSelectedEntries] = useState(new Set());
   const [enableTrim, setEnableTrim] = useState(false);
@@ -249,14 +243,7 @@ const VideoDownloader = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (isAuthenticated) return;
-    // Update the PIN every 60 seconds. The progress bar animation is handled purely by CSS at 120fps.
-    const interval = setInterval(() => {
-      setCurrentPin(Math.floor(1000 + Math.random() * 9000).toString());
-    }, 60000); 
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
+
   
   const handlePodcastAction = async (filename, thumbnail) => {
     setConverting(filename);
@@ -601,67 +588,6 @@ const VideoDownloader = () => {
     setTasks({});
     setEnableTrim(false);
   };
-
-  const handlePinSubmit = (e) => {
-    e.preventDefault();
-    if (pinCode === currentPin) {
-      setUnlockSuccess(true);
-      playDing();
-      toast.success('Access Granted!');
-      setTimeout(() => {
-        setIsAuthenticated(true);
-        localStorage.setItem('mdp_auth', 'true');
-      }, 1000);
-    } else {
-      toast.error('Invalid PIN');
-      setPinCode('');
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#030014] text-white relative flex items-center justify-center p-4 overflow-hidden">
-        <BackgroundElements themeColor={themeColor} />
-        <div className="relative z-10 w-full max-w-sm p-8 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-2xl text-center">
-          <div className="w-20 h-20 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-500/30">
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-          </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Restricted Access</h1>
-          <p className="text-gray-400 text-sm mb-6">Enter the active security PIN to access the Media Downloader Pro.</p>
-          
-          <div className="mb-6 p-4 bg-black/50 border border-white/10 rounded-xl relative overflow-hidden flex flex-col items-center">
-            <div className="text-xs text-purple-400 uppercase tracking-[0.2em] mb-2 font-bold">Active Auth Code</div>
-            <div className="text-4xl font-mono tracking-[0.3em] font-bold text-white mb-2" style={{ textShadow: `0 0 20px ${themeColor}` }}>
-              {currentPin}
-            </div>
-            <div 
-              key={currentPin}
-              className="absolute bottom-0 left-0 h-1" 
-              style={{ 
-                backgroundColor: themeColor,
-                animation: 'shrinkWidth 60s linear forwards'
-              }} 
-            />
-          </div>
-
-          <form onSubmit={handlePinSubmit} className="flex flex-col gap-4">
-            <input 
-              type="text" 
-              value={pinCode}
-              onChange={(e) => setPinCode(e.target.value)}
-              placeholder="Enter PIN..."
-              className="w-full text-center tracking-[1em] font-mono text-xl px-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-purple-500/50 shadow-inner"
-              maxLength={4}
-              required
-            />
-            <button disabled={unlockSuccess} type="submit" className={`w-full py-4 rounded-2xl font-bold text-lg transition-colors shadow-lg ${unlockSuccess ? 'bg-green-500 text-white' : 'bg-purple-600 hover:bg-purple-500'}`}>
-              {unlockSuccess ? 'Unlocking...' : 'Unlock'}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#030014] text-white relative font-sans overflow-x-hidden selection:bg-purple-500/30 selection:text-white flex flex-col items-center pt-12 md:pt-20 px-4 pb-20">
