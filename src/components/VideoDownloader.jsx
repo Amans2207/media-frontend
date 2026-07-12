@@ -8,6 +8,7 @@ import GlobalAudioPlayer from './GlobalAudioPlayer';
 import { QRCodeSVG } from 'qrcode.react';
 import Confetti from 'react-confetti';
 import Tilt from 'react-parallax-tilt';
+import SupportUs from './SupportUs';
 
 // Base64 short sounds (Minimal sizes)
 const popSound = new Audio("data:audio/wav;base64,UklGRmYAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUMAAAB/f39/f39/f4CAgIB/f39/f4CAgIB/f39/f4CAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA");
@@ -679,6 +680,8 @@ const VideoDownloader = () => {
         onClose={() => setCurrentTrack(null)}
         themeColor={themeColor}
       />
+      
+      <SupportUs themeColor={themeColor} />
 
       {/* QR Code Modal */}
       <AnimatePresence>
@@ -1113,6 +1116,23 @@ const VideoDownloader = () => {
                             Save to Disk
                           </a>
                         </div>
+
+                        {/* Affiliate Banner */}
+                        <a href="#" target="_blank" rel="noopener noreferrer" className="mt-4 block w-full bg-gradient-to-r from-blue-900/50 to-indigo-900/50 border border-blue-500/20 hover:border-blue-500/40 rounded-xl p-4 overflow-hidden relative group transition-all shadow-inner">
+                          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-blue-500/10 to-transparent pointer-events-none" />
+                          <div className="relative z-10 flex items-center justify-between">
+                            <div>
+                              <h4 className="font-bold text-blue-100 flex items-center gap-2 text-sm md:text-base">
+                                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                                Protect your Privacy
+                              </h4>
+                              <p className="text-xs text-blue-300 mt-1">Downloading media? Hide your IP with NordVPN. Get 69% off!</p>
+                            </div>
+                            <span className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition-colors shadow-lg shadow-blue-900/50 whitespace-nowrap ml-4">
+                              Get VPN
+                            </span>
+                          </div>
+                        </a>
                       </motion.div>
                     )}
                   </motion.div>
