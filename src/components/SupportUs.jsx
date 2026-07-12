@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function SupportUs({ themeColor = '#9333ea' }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,10 +19,16 @@ export default function SupportUs({ themeColor = '#9333ea' }) {
             <p className="text-sm text-gray-400 mb-4">
               If you enjoy our free premium downloads, please consider supporting the server costs!
             </p>
-            <div className="space-y-3">
-              <a href="upi://pay?pa=8766083129@ptyes&pn=MediaDownloaderPro&cu=INR" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold transition-all text-white shadow-lg shadow-purple-500/20 hover:scale-[1.02]" style={{ backgroundColor: themeColor }}>
+            <div className="space-y-4">
+              <div className="bg-white p-2 rounded-xl w-32 h-32 mx-auto">
+                <QRCodeSVG value="upi://pay?pa=8766083129@ptyes&pn=MediaDownloaderPro&cu=INR" size={100} className="w-full h-full" />
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-gray-400 font-mono">UPI: 8766083129@ptyes</p>
+              </div>
+              <a href="upi://pay?pa=8766083129@ptyes&pn=MediaDownloaderPro&cu=INR" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold transition-all text-white shadow-lg shadow-purple-500/20 hover:scale-[1.02] md:hidden" style={{ backgroundColor: themeColor }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Support via UPI
+                Pay via UPI App
               </a>
             </div>
             
