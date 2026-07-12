@@ -31,28 +31,14 @@ const PLATFORM_THEMES = {
 };
 
 const BackgroundElements = ({ themeColor }) => {
-  // Generate random particles once
-  const [particles] = useState(() => Array.from({ length: 30 }).map((_, i) => ({
+  // Generate random particles once (reduced from 30 to 15 for performance)
+  const [particles] = useState(() => Array.from({ length: 15 }).map((_, i) => ({
     id: i,
     size: Math.random() * 3 + 1,
     left: Math.random() * 100,
-    duration: Math.random() * 30 + 20,
+    duration: Math.random() * 30 + 30,
     delay: Math.random() * -30,
   })));
-
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springX = useSpring(mouseX, { damping: 40, stiffness: 100 });
-  const springY = useSpring(mouseY, { damping: 40, stiffness: 100 });
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      mouseX.set((e.clientX - window.innerWidth / 2) / 20);
-      mouseY.set((e.clientY - window.innerHeight / 2) / 20);
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [mouseX, mouseY]);
 
   return (
     <>
@@ -106,12 +92,7 @@ const BackgroundElements = ({ themeColor }) => {
           />
         ))}
       </div>
-
-      {/* Mouse Parallax Follower (Interactive Glow) - Optimized */}
-      <motion.div
-        style={{ x: springX, y: springY, backgroundImage: `radial-gradient(circle at center, ${themeColor} 0%, transparent 60%)` }}
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none opacity-30 transition-colors duration-1000 z-0"
-      />
+      </div>
     </>
   );
 };
