@@ -1218,14 +1218,12 @@ const VideoDownloader = ({ session }) => {
               </div>
 
               <div className="bg-purple-900/20 border border-purple-500/20 rounded-xl p-4 text-center">
-                <p className="text-sm text-purple-200 mb-3">After payment, send the screenshot to Admin to activate your account.</p>
+                <p className="text-sm text-purple-200 mb-3">After payment, email us the screenshot from your registered email: <strong className="text-white bg-black/50 px-2 py-1 rounded">{session?.user?.email}</strong></p>
                 <a 
-                  href="https://t.me/YourTelegramUsername" 
-                  target="_blank" 
-                  rel="noreferrer"
+                  href={`mailto:as65012007@gmail.com?subject=PRO Upgrade Payment&body=Hi, I have paid for the PRO Upgrade.%0A%0AMy Registered Account Email: ${session?.user?.email}%0A%0A(Please attach your payment screenshot to this email)`}
                   className="inline-flex items-center justify-center w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold transition-colors"
                 >
-                  Contact Admin
+                  Email Admin
                 </a>
               </div>
             </motion.div>
