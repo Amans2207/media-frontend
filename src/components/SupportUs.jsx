@@ -14,18 +14,14 @@ export default function SupportUs({ themeColor = '#9333ea' }) {
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className="absolute bottom-16 right-0 mb-4 w-72 bg-[#18181b] border border-white/10 rounded-2xl shadow-2xl p-6 text-white"
           >
-            <h3 className="font-bold text-lg mb-2">Buy me a Coffee ☕</h3>
+            <h3 className="font-bold text-lg mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Support Us ❤️</h3>
             <p className="text-sm text-gray-400 mb-4">
               If you enjoy our free premium downloads, please consider supporting the server costs!
             </p>
             <div className="space-y-3">
-              <a href="#" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-medium transition-colors text-white" style={{ backgroundColor: themeColor }}>
+              <a href="upi://pay?pa=8766083129@ptyes&pn=MediaDownloaderPro&cu=INR" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold transition-all text-white shadow-lg shadow-purple-500/20 hover:scale-[1.02]" style={{ backgroundColor: themeColor }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Donate via UPI
-              </a>
-              <a href="#" className="flex items-center justify-center gap-2 w-full py-2.5 bg-white/5 hover:bg-white/10 rounded-xl font-medium transition-colors border border-white/5 text-white">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                Buy me a Coffee
+                Support via UPI
               </a>
             </div>
             
