@@ -125,7 +125,9 @@ const VideoDownloader = () => {
   const [videoInfo, setVideoInfo] = useState(null);
   
   // Security State
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('mdp_auth') === 'true';
+  });
   const [pinCode, setPinCode] = useState('');
   const [currentPin, setCurrentPin] = useState('2026');
   const [unlockSuccess, setUnlockSuccess] = useState(false);
@@ -607,6 +609,7 @@ const VideoDownloader = () => {
       toast.success('Access Granted!');
       setTimeout(() => {
         setIsAuthenticated(true);
+        localStorage.setItem('mdp_auth', 'true');
       }, 1000);
     } else {
       toast.error('Invalid PIN');
