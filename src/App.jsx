@@ -39,13 +39,12 @@ function App() {
       return config;
     }, (error) => Promise.reject(error));
 
-    // Handle logout if backend rejects the token
+    // Handle 401 errors gracefully without aggressively signing out, 
+    // as Supabase might be in the middle of refreshing the token.
     axios.interceptors.response.use(
       (response) => response,
       async (error) => {
-        if (error.response && error.response.status === 401) {
-          await supabase.auth.signOut();
-        }
+        // We let Supabase handle the actual session state.
         return Promise.reject(error);
       }
     );
