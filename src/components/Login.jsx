@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../supabaseClient';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion } from 'framer-motion';
@@ -17,29 +18,38 @@ export default function Login({ onLogin }) {
     }
 
     setLoading(true);
-    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
     
     try {
-      const res = await axios.post(`https://media-backend-production-b846.up.railway.app${endpoint}`, { email, password });
-      
       if (isLogin) {
-        localStorage.setItem('mdp_token', res.data.token);
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        
         toast.success('Login Successful!');
         setTimeout(() => onLogin(), 1000);
       } else {
-        toast.success('Registration Successful! Please login.');
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        
+        toast.success('Registration Successful! Please check your email or login.');
         setIsLogin(true);
         setPassword('');
       }
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Authentication failed');
+      toast.error(err.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleLogin = () => {
-    toast.error('Google Login is coming soon! Please use Email/Password for now.');
+  const handleGoogleLogin = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+      if (error) throw error;
+    } catch (err) {
+      toast.error(err.message || 'Google Login failed');
+    }
   };
 
   return (

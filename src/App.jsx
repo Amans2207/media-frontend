@@ -2,38 +2,65 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import VideoDownloader from './components/VideoDownloader';
 import Login from './components/Login';
-
-// Configure Axios globally to inject the JWT token
-axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('mdp_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, (error) => Promise.reject(error));
+import { supabase } from './supabaseClient';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return !!localStorage.getItem('mdp_token');
-  });
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Handle logout interceptor (if backend returns 401 Unauthorized)
   useEffect(() => {
-    const interceptor = axios.interceptors.response.use(
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setupAxios(session);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setupAxios(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const setupAxios = (session) => {
+    // Clear previous interceptors to avoid stacking
+    axios.interceptors.request.clear();
+    axios.interceptors.response.clear();
+
+    axios.interceptors.request.use((config) => {
+      if (session?.access_token) {
+        config.headers.Authorization = `Bearer ${session.access_token}`;
+      }
+      return config;
+    }, (error) => Promise.reject(error));
+
+    // Handle logout if backend rejects the token
+    axios.interceptors.response.use(
       (response) => response,
-      (error) => {
+      async (error) => {
         if (error.response && error.response.status === 401) {
-          localStorage.removeItem('mdp_token');
-          setIsAuthenticated(false);
+          await supabase.auth.signOut();
         }
         return Promise.reject(error);
       }
     );
-    return () => axios.interceptors.response.eject(interceptor);
-  }, []);
+  };
 
-  if (!isAuthenticated) {
-    return <Login onLogin={() => setIsAuthenticated(true)} />;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#030014] text-white flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Login onLogin={() => {}} />; // onLogin not needed anymore as onAuthStateChange handles it
   }
 
   return (
