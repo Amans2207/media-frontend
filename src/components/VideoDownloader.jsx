@@ -1111,8 +1111,8 @@ const VideoDownloader = ({ session }) => {
         </div>
       </div>
 
-      {/* Floating Theme Switcher */}
-      <div className="fixed top-6 right-6 z-50 flex items-center gap-2 bg-black/40 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-2xl">
+      {/* Theme Switcher */}
+      <div className="fixed top-6 left-6 z-50 flex items-center gap-2 bg-black/40 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-2xl">
         {Object.entries(AESTHETICS).map(([key, val]) => (
           <button
             key={key}
@@ -1191,7 +1191,7 @@ const VideoDownloader = ({ session }) => {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-[#111116] border border-yellow-500/30 rounded-3xl p-8 max-w-md w-full relative overflow-hidden"
+              className="bg-[#111116] border border-yellow-500/30 rounded-3xl p-6 md:p-8 max-w-md w-full relative overflow-hidden max-h-[95vh] overflow-y-auto scrollbar-hide"
             >
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-yellow-400 via-yellow-600 to-yellow-400" />
               
@@ -1202,51 +1202,50 @@ const VideoDownloader = ({ session }) => {
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
 
-              <div className="text-center mb-6">
-                <span className="text-5xl mb-2 block">👑</span>
-                <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">
+              <div className="text-center mb-4 mt-2">
+                <span className="text-4xl mb-1 block">👑</span>
+                <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">
                   Upgrade to PRO
                 </h2>
-                <p className="text-gray-400 mt-2">Unlock the ultimate media experience.</p>
+                <p className="text-gray-400 mt-1 text-sm">Unlock the ultimate media experience.</p>
               </div>
 
-              <div className="space-y-3 mb-6 bg-white/5 rounded-xl p-4 border border-white/5">
-                <div className="flex items-center gap-3 text-gray-300"><span className="text-yellow-400">✓</span> 4K Max Quality (Merged Video)</div>
-                <div className="flex items-center gap-3 text-gray-300"><span className="text-yellow-400">✓</span> 8D, Bass & Stereo Audio</div>
-                <div className="flex items-center gap-3 text-gray-300"><span className="text-yellow-400">✓</span> Slowed & Reverb (Lofi MP3)</div>
-                <div className="flex items-center gap-3 text-gray-300"><span className="text-yellow-400">✓</span> Priority 120fps Download Speeds</div>
+              <div className="space-y-2 mb-4 bg-white/5 rounded-xl p-3 border border-white/5 text-sm">
+                <div className="flex items-center gap-2 text-gray-300"><span className="text-yellow-400">✓</span> 4K Max Quality (Merged Video)</div>
+                <div className="flex items-center gap-2 text-gray-300"><span className="text-yellow-400">✓</span> 8D, Bass & Stereo Audio</div>
+                <div className="flex items-center gap-2 text-gray-300"><span className="text-yellow-400">✓</span> Slowed & Reverb (Lofi MP3)</div>
+                <div className="flex items-center gap-2 text-gray-300"><span className="text-yellow-400">✓</span> Priority 120fps Download Speeds</div>
               </div>
 
-              <div className="bg-black/40 rounded-xl p-4 text-center border border-white/5 mb-6">
-                <p className="text-sm text-gray-400 uppercase tracking-widest font-bold mb-1">Subscription Plan</p>
-                <p className="text-3xl font-black text-white">₹49<span className="text-lg text-gray-500 font-medium">/month</span></p>
-                <p className="text-xs text-yellow-500 mt-1 font-medium">Limited time offer!</p>
+              <div className="bg-black/40 rounded-xl p-3 text-center border border-white/5 mb-4">
+                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">Subscription Plan</p>
+                <p className="text-2xl font-black text-white">₹49<span className="text-sm text-gray-500 font-medium">/month</span></p>
               </div>
 
-              <div className="flex flex-col items-center justify-center gap-4 mb-6">
-                <div className="p-2 bg-white rounded-xl">
-                  <QRCodeSVG value="upi://pay?pa=8766083129@ptyes&pn=Media%20Downloader%20Pro&cu=INR" size={150} />
+              <div className="flex flex-col items-center justify-center gap-2 mb-4">
+                <div className="p-1.5 bg-white rounded-xl">
+                  <QRCodeSVG value="upi://pay?pa=8766083129@ptyes&pn=Media%20Downloader%20Pro&cu=INR" size={120} />
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-bold text-white mb-1">Scan to Pay via any UPI App</p>
-                  <p className="text-xs text-gray-400 font-mono">UPI ID: 8766083129@ptyes</p>
+                  <p className="text-xs font-bold text-white mb-0.5">Scan to Pay via any UPI App</p>
+                  <p className="text-[10px] text-gray-400 font-mono">UPI ID: 8766083129@ptyes</p>
                 </div>
               </div>
 
-              <div className="bg-purple-900/20 border border-purple-500/20 rounded-xl p-4 text-center">
-                <p className="text-sm text-purple-200 mb-3">After payment, send the screenshot from your registered email: <strong className="text-white bg-black/50 px-2 py-1 rounded">{session?.user?.email}</strong></p>
-                <div className="flex gap-3">
+              <div className="bg-purple-900/20 border border-purple-500/20 rounded-xl p-3 text-center">
+                <p className="text-xs text-purple-200 mb-2">After payment, send the screenshot from your registered email: <strong className="text-white bg-black/50 px-1 py-0.5 rounded">{session?.user?.email}</strong></p>
+                <div className="flex gap-2">
                   <a 
                     href={`https://wa.me/918766083129?text=Hi, I have paid for the PRO Upgrade.%0A%0AMy Registered Account Email: ${session?.user?.email}%0A%0A(I will attach my payment screenshot)`}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 inline-flex items-center justify-center py-3 bg-green-600 hover:bg-green-500 text-white rounded-lg font-bold transition-colors"
+                    className="flex-1 inline-flex items-center justify-center py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg font-bold transition-colors text-sm"
                   >
                     WhatsApp
                   </a>
                   <a 
                     href={`mailto:as65012007@gmail.com?subject=PRO Upgrade Payment&body=Hi, I have paid for the PRO Upgrade.%0A%0AMy Registered Account Email: ${session?.user?.email}%0A%0A(Please attach your payment screenshot to this email)`}
-                    className="flex-1 inline-flex items-center justify-center py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold transition-colors"
+                    className="flex-1 inline-flex items-center justify-center py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold transition-colors text-sm"
                   >
                     Email
                   </a>
