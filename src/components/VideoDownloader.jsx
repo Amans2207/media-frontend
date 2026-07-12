@@ -257,7 +257,7 @@ const VideoDownloader = () => {
         }
         return prev - 1;
       });
-    }, 100);
+    }, 600); // Changed from 100 to 600 to give 60 seconds (reduces re-renders & lag)
     return () => clearInterval(interval);
   }, [isAuthenticated]);
   
@@ -636,7 +636,7 @@ const VideoDownloader = () => {
             <div className="text-4xl font-mono tracking-[0.3em] font-bold text-white mb-2" style={{ textShadow: `0 0 20px ${themeColor}` }}>
               {currentPin}
             </div>
-            <div className="absolute bottom-0 left-0 h-1 transition-all duration-100" style={{ width: `${pinProgress}%`, backgroundColor: themeColor }} />
+            <div className="absolute bottom-0 left-0 h-1 transition-all duration-500 ease-linear" style={{ width: `${pinProgress}%`, backgroundColor: themeColor }} />
           </div>
 
           <form onSubmit={handlePinSubmit} className="flex flex-col gap-4">
