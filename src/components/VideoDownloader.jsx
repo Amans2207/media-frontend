@@ -606,6 +606,22 @@ const VideoDownloader = ({ session }) => {
   return (
     <div className="min-h-screen bg-[#030014] text-white relative font-sans overflow-x-hidden selection:bg-purple-500/30 selection:text-white flex flex-col items-center pt-12 md:pt-20 px-4 pb-20">
       <BackgroundElements themeColor={themeColor} />
+
+      {/* PRO Badge / Upgrade Button */}
+      {!is_pro && (
+        <button
+          onClick={() => setShowProModal(true)}
+          className="fixed top-6 right-6 z-50 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-300 hover:to-yellow-500 text-black font-black px-5 py-2.5 rounded-full shadow-[0_0_20px_rgba(250,204,21,0.4)] hover:shadow-[0_0_30px_rgba(250,204,21,0.6)] hover:scale-105 transition-all flex items-center gap-2"
+        >
+          <span className="text-xl">👑</span> Get PRO Access
+        </button>
+      )}
+      {is_pro && (
+        <div className="fixed top-6 right-6 z-50 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 font-bold px-4 py-2 rounded-full shadow-[0_0_15px_rgba(250,204,21,0.1)] flex items-center gap-2 backdrop-blur-md">
+          <span className="text-lg">👑</span> PRO Member
+        </div>
+      )}
+
       {showConfetti && <Confetti recycle={false} numberOfPieces={800} gravity={0.15} colors={['#9333ea', '#ec4899', '#3b82f6', '#22c55e']} style={{ zIndex: 100 }} />}
       
       <Toaster position="bottom-center" toastOptions={{ 
