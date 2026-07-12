@@ -128,7 +128,6 @@ const VideoDownloader = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinCode, setPinCode] = useState('');
   const [currentPin, setCurrentPin] = useState('2026');
-  const [pinProgress, setPinProgress] = useState(100);
   const [unlockSuccess, setUnlockSuccess] = useState(false);
   
   const [selectedEntries, setSelectedEntries] = useState(new Set());
@@ -249,15 +248,10 @@ const VideoDownloader = () => {
 
   useEffect(() => {
     if (isAuthenticated) return;
+    // Update the PIN every 60 seconds. The progress bar animation is handled purely by CSS at 120fps.
     const interval = setInterval(() => {
-      setPinProgress(prev => {
-        if (prev <= 0) {
-          setCurrentPin(Math.floor(1000 + Math.random() * 9000).toString());
-          return 100;
-        }
-        return prev - 1;
-      });
-    }, 600); // Changed from 100 to 600 to give 60 seconds (reduces re-renders & lag)
+      setCurrentPin(Math.floor(1000 + Math.random() * 9000).toString());
+    }, 60000); 
     return () => clearInterval(interval);
   }, [isAuthenticated]);
   
@@ -636,7 +630,14 @@ const VideoDownloader = () => {
             <div className="text-4xl font-mono tracking-[0.3em] font-bold text-white mb-2" style={{ textShadow: `0 0 20px ${themeColor}` }}>
               {currentPin}
             </div>
-            <div className="absolute bottom-0 left-0 h-1 transition-all duration-500 ease-linear" style={{ width: `${pinProgress}%`, backgroundColor: themeColor }} />
+            <div 
+              key={currentPin}
+              className="absolute bottom-0 left-0 h-1" 
+              style={{ 
+                backgroundColor: themeColor,
+                animation: 'shrinkWidth 60s linear forwards'
+              }} 
+            />
           </div>
 
           <form onSubmit={handlePinSubmit} className="flex flex-col gap-4">
