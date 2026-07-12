@@ -1197,9 +1197,16 @@ const VideoDownloader = ({ session }) => {
                 <div className="flex items-center gap-2 text-gray-300"><span className="text-yellow-400">✓</span> Priority 120fps Download Speeds</div>
               </div>
 
-              <div className="bg-black/40 rounded-xl p-3 text-center border border-white/5 mb-4">
-                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">Subscription Plan</p>
-                <p className="text-2xl font-black text-white">₹49<span className="text-sm text-gray-500 font-medium">/month</span></p>
+              <div className="flex gap-2 mb-4">
+                <div className="flex-1 bg-white/5 rounded-xl p-3 text-center border border-white/10">
+                  <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">1 Month</p>
+                  <p className="text-2xl font-black text-white">₹149</p>
+                </div>
+                <div className="flex-1 bg-yellow-500/10 rounded-xl p-3 text-center border border-yellow-500/50 relative">
+                  <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[9px] font-bold px-2 py-0.5 rounded-bl-lg rounded-tr-lg">SAVE 16%</div>
+                  <p className="text-xs text-yellow-500 uppercase tracking-widest font-bold mb-1">1 Year</p>
+                  <p className="text-2xl font-black text-white">₹1499</p>
+                </div>
               </div>
 
               <div className="flex flex-col items-center justify-center gap-2 mb-4">
@@ -1207,7 +1214,7 @@ const VideoDownloader = ({ session }) => {
                   <QRCodeSVG value="upi://pay?pa=8766083129@ptyes&pn=Media%20Downloader%20Pro&cu=INR" size={120} />
                 </div>
                 <div className="text-center">
-                  <p className="text-xs font-bold text-white mb-0.5">Scan to Pay via any UPI App</p>
+                  <p className="text-xs font-bold text-white mb-0.5">Scan & Pay (Enter ₹149 or ₹1499)</p>
                   <p className="text-[10px] text-gray-400 font-mono">UPI ID: 8766083129@ptyes</p>
                 </div>
               </div>
