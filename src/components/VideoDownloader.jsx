@@ -92,7 +92,6 @@ const BackgroundElements = ({ themeColor }) => {
           />
         ))}
       </div>
-      </div>
     </>
   );
 };
