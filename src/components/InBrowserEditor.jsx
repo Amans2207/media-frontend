@@ -38,7 +38,7 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
     });
 
     try {
-      const baseURL = '/ffmpeg';
+      const baseURL = window.location.origin + '/ffmpeg';
       await ffmpeg.load({
         coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
         wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
