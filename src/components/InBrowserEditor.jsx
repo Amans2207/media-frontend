@@ -16,6 +16,12 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [crop, setCrop] = useState('none'); // none, 1:1, 9:16, 16:9
   const [mute, setMute] = useState(false);
   
+  // Advanced Features
+  const [speed, setSpeed] = useState(1.0);
+  const [videoFilter, setVideoFilter] = useState('none');
+  const [reverse, setReverse] = useState(false);
+  const [customAudio, setCustomAudio] = useState(null);
+  
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -53,6 +59,24 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
     }
   };
 
+  const handleSnapshot = () => {
+    if (!videoRef.current) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+    
+    const dataUrl = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `snapshot_${Math.floor(videoRef.current.currentTime)}s.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Snapshot saved!");
+  };
+
   const handleExport = async () => {
     try {
       setIsProcessing(true);
@@ -66,28 +90,66 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
       await ffmpeg.writeFile(inputName, await fetchFile(fileUrl));
 
       let ffmpegArgs = ['-i', inputName];
+      
+      if (customAudio) {
+        await ffmpeg.writeFile('audio.mp3', await fetchFile(customAudio));
+        ffmpegArgs.push('-i', 'audio.mp3');
+      }
 
-      // Video filters (Crop + Watermark)
+      // Video filters
       let vfFilters = [];
       if (crop !== 'none') {
         if (crop === '1:1') vfFilters.push("crop=ih:ih"); // Square
         else if (crop === '9:16') vfFilters.push("crop=ih*9/16:ih"); // Vertical
         else if (crop === '16:9') vfFilters.push("crop=iw:iw*9/16"); // Horizontal
       }
+      
+      if (reverse) {
+        vfFilters.push("reverse");
+      }
+      
+      if (speed !== 1.0) {
+        vfFilters.push(`setpts=${(1/speed).toFixed(2)}*PTS`);
+      }
+      
+      if (videoFilter === 'bw') {
+        vfFilters.push("colorchannelmixer=.3:.4:.3:0:.3:.4:.3:0:.3:.4:.3");
+      } else if (videoFilter === 'vibrant') {
+        vfFilters.push("eq=saturation=1.5");
+      } else if (videoFilter === 'blur') {
+        vfFilters.push("boxblur=5:1");
+      }
 
       if (vfFilters.length > 0) {
         ffmpegArgs.push('-vf', vfFilters.join(','));
       }
 
+      // Audio Filters
+      let afFilters = [];
+      if (reverse) afFilters.push("areverse");
+      if (speed !== 1.0) afFilters.push(`atempo=${speed}`);
+      
       // Trimming
       if (trimStart > 0 || trimEnd < duration) {
         ffmpegArgs.push('-ss', trimStart.toString());
         ffmpegArgs.push('-to', trimEnd.toString());
       }
 
-      // Audio
-      if (mute) {
+      // Audio handling
+      if (mute && !customAudio) {
         ffmpegArgs.push('-an');
+      } else if (customAudio) {
+        // Map original video and new audio
+        ffmpegArgs.push('-map', '0:v:0', '-map', '1:a:0');
+        if (afFilters.length > 0) {
+           // We have to apply audio filters to the new audio track
+           ffmpegArgs.push('-af', afFilters.join(','));
+        }
+        ffmpegArgs.push('-shortest'); // End when shortest stream ends
+      } else {
+        if (afFilters.length > 0) {
+           ffmpegArgs.push('-af', afFilters.join(','));
+        }
       }
 
       // Output Settings
@@ -147,6 +209,13 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
             onLoadedMetadata={handleLoadedMetadata}
             crossOrigin="anonymous"
           />
+          <button 
+            onClick={handleSnapshot}
+            className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-sm font-medium rounded-lg text-white flex items-center gap-2 transition-colors border border-white/10"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            Capture Frame
+          </button>
           
           {isProcessing && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-20">
@@ -209,14 +278,60 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
             </div>
           </div>
 
+          {/* Advanced Filters */}
+          <div className="bg-white/5 p-4 rounded-xl border border-white/5 grid grid-cols-2 gap-4">
+            
+            {/* Speed */}
+            <div>
+              <h3 className="text-xs font-semibold text-gray-300 mb-2">Video Speed</h3>
+              <select 
+                value={speed} 
+                onChange={(e) => setSpeed(parseFloat(e.target.value))}
+                className="w-full bg-black/50 border border-white/10 rounded-lg text-xs text-white p-2 focus:outline-none"
+              >
+                <option value={0.5}>0.5x (Slow Mo)</option>
+                <option value={1.0}>1.0x (Normal)</option>
+                <option value={1.5}>1.5x (Fast)</option>
+                <option value={2.0}>2.0x (Very Fast)</option>
+              </select>
+            </div>
+
+            {/* Video Filters */}
+            <div>
+              <h3 className="text-xs font-semibold text-gray-300 mb-2">Color Filter</h3>
+              <select 
+                value={videoFilter} 
+                onChange={(e) => setVideoFilter(e.target.value)}
+                className="w-full bg-black/50 border border-white/10 rounded-lg text-xs text-white p-2 focus:outline-none"
+              >
+                <option value="none">None</option>
+                <option value="bw">Black & White</option>
+                <option value="vibrant">Vibrant Pop</option>
+                <option value="blur">Blur</option>
+              </select>
+            </div>
+            
+            {/* Custom Music */}
+            <div className="col-span-2">
+              <h3 className="text-xs font-semibold text-gray-300 mb-2">Custom Background Music</h3>
+              <input 
+                type="file" 
+                accept="audio/*"
+                onChange={(e) => setCustomAudio(e.target.files[0])}
+                className="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-500/20 file:text-purple-300 hover:file:bg-purple-500/30"
+              />
+            </div>
+          </div>
+
           {/* Options */}
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2 cursor-pointer bg-white/5 p-3 rounded-xl border border-white/5 flex-1">
+          <div className="flex gap-2 text-xs">
+            <label className="flex items-center gap-2 cursor-pointer bg-white/5 p-2 rounded-xl border border-white/5 flex-1">
               <input type="checkbox" checked={mute} onChange={(e) => setMute(e.target.checked)} className="rounded bg-black/50 border-white/20 text-purple-500 focus:ring-0" />
-              <span className="text-sm text-gray-300">Mute Audio</span>
+              <span className="text-gray-300">Mute Audio</span>
             </label>
-            <label className="flex items-center justify-center gap-2 bg-white/5 p-3 rounded-xl border border-white/5 flex-1 opacity-50 cursor-not-allowed">
-              <span className="text-sm text-gray-400 line-through">Watermark (PRO)</span>
+            <label className="flex items-center gap-2 cursor-pointer bg-white/5 p-2 rounded-xl border border-white/5 flex-1">
+              <input type="checkbox" checked={reverse} onChange={(e) => setReverse(e.target.checked)} className="rounded bg-black/50 border-white/20 text-blue-500 focus:ring-0" />
+              <span className="text-gray-300">Reverse Video</span>
             </label>
           </div>
 
