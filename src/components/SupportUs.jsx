@@ -4,6 +4,26 @@ import { QRCodeSVG } from 'qrcode.react';
 
 export default function SupportUs({ themeColor = '#9333ea' }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    }
+  };
 
   return (
     <div className="fixed bottom-6 right-6 z-[100]">
@@ -20,6 +40,16 @@ export default function SupportUs({ themeColor = '#9333ea' }) {
               If you enjoy our free premium downloads, please consider supporting the server costs!
             </p>
             <div className="space-y-4">
+              {deferredPrompt && (
+                <button 
+                  onClick={handleInstallClick}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl font-bold text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                  Install Our App
+                </button>
+              )}
+              <hr className="border-white/10" />
               <div className="bg-white p-2 rounded-xl w-32 h-32 mx-auto">
                 <QRCodeSVG value="upi://pay?pa=8766083129@ptyes&pn=MediaDownloaderPro&cu=INR" size={100} className="w-full h-full" />
               </div>
