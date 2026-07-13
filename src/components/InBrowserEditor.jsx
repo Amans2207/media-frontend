@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [loaded, setLoaded] = useState(false);
@@ -80,17 +81,9 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
       formData.append('options', JSON.stringify(options));
       
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://media-backend-production-b846.up.railway.app';
-      const response = await fetch(`${backendUrl}/api/editor/process`, {
-        method: 'POST',
-        body: formData
-      });
+      const response = await axios.post(`${backendUrl}/api/editor/process`, formData);
+      const data = response.data;
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to process video on server');
-      }
-      
-      const data = await response.json();
       setProgress(100);
       
       if (data.success && data.fileUrl) {
