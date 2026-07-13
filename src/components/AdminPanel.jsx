@@ -165,9 +165,9 @@ export default function AdminPanel({ onBack }) {
 
   const handleExportCSV = () => {
     if (users.length === 0) return;
-    const headers = ['ID', 'Email', 'Joined', 'Last Login', 'PRO Status', 'Plan', 'Banned'];
+    const headers = ['ID', 'Email', 'Name', 'Phone', 'Joined', 'Last Login', 'PRO Status', 'Plan', 'Banned'];
     const rows = users.map(u => [
-      u.id, u.email, u.created_at ? new Date(u.created_at).toISOString() : '', 
+      u.id, u.email, u.name, u.phone, u.created_at ? new Date(u.created_at).toISOString() : '', 
       u.last_sign_in_at ? new Date(u.last_sign_in_at).toISOString() : '', 
       u.is_pro ? 'YES' : 'NO', u.plan || 'None', u.is_banned ? 'YES' : 'NO'
     ]);
@@ -278,7 +278,7 @@ export default function AdminPanel({ onBack }) {
                 <table className="w-full text-left">
                   <thead className="bg-white/5">
                     <tr>
-                      <th className="px-6 py-4 text-sm font-medium text-gray-400">Email</th>
+                      <th className="px-6 py-4 text-sm font-medium text-gray-400">User Info</th>
                       <th className="px-6 py-4 text-sm font-medium text-gray-400">Status</th>
                       <th className="px-6 py-4 text-sm font-medium text-gray-400">Plan</th>
                       <th className="px-6 py-4 text-sm font-medium text-gray-400">Joined</th>
@@ -295,9 +295,15 @@ export default function AdminPanel({ onBack }) {
                       filteredUsers.map(user => (
                         <tr key={user.id} className="hover:bg-white/5 transition-colors">
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              <span className={user.is_banned ? "text-gray-500 line-through" : ""}>{user.email}</span>
-                              {user.is_banned && <span className="bg-red-500/20 text-red-500 text-[10px] font-bold px-1.5 py-0.5 rounded border border-red-500/30">BANNED</span>}
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <span className={`font-medium ${user.is_banned ? "text-gray-500 line-through" : ""}`}>{user.email}</span>
+                                {user.is_banned && <span className="bg-red-500/20 text-red-500 text-[10px] font-bold px-1.5 py-0.5 rounded border border-red-500/30">BANNED</span>}
+                              </div>
+                              <div className="flex items-center gap-3 text-xs text-gray-400">
+                                {user.name !== 'N/A' && <span>👤 {user.name}</span>}
+                                {user.phone !== 'N/A' && <span>📱 {user.phone}</span>}
+                              </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
