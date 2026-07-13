@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import toast from 'react-hot-toast';
 
 export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [loaded, setLoaded] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState('Initializing Editor Engine...');
   const [progress, setProgress] = useState(0);
-  const ffmpegRef = useRef(new FFmpeg());
+  const ffmpegRef = useRef(createFFmpeg({ log: true }));
   const videoRef = useRef(null);
 
   const [trimStart, setTrimStart] = useState(0);
@@ -30,19 +29,15 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
 
   const loadFFmpeg = async () => {
     const ffmpeg = ffmpegRef.current;
-    ffmpeg.on('log', ({ message }) => {
-      console.log(message);
-    });
-    ffmpeg.on('progress', ({ progress, time }) => {
-      setProgress(Math.round(progress * 100));
+    
+    ffmpeg.setProgress(({ ratio }) => {
+      setProgress(Math.round(ratio * 100));
     });
 
     try {
-      const baseURL = window.location.origin + '/ffmpeg';
-      await ffmpeg.load({
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-      });
+      if (!ffmpeg.isLoaded()) {
+        await ffmpeg.load();
+      }
       setLoaded(true);
       setLoadingMsg('');
     } catch (e) {
@@ -87,12 +82,12 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
       const outputName = 'output.mp4';
       
       // Write file to FFmpeg Virtual File System
-      await ffmpeg.writeFile(inputName, await fetchFile(fileUrl));
+      ffmpeg.FS('writeFile', inputName, await fetchFile(fileUrl));
 
       let ffmpegArgs = ['-i', inputName];
       
       if (customAudio) {
-        await ffmpeg.writeFile('audio.mp3', await fetchFile(customAudio));
+        ffmpeg.FS('writeFile', 'audio.mp3', await fetchFile(customAudio));
         ffmpegArgs.push('-i', 'audio.mp3');
       }
 
@@ -156,10 +151,10 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
       ffmpegArgs.push('-c:v', 'libx264', '-preset', 'ultrafast', outputName);
 
       // Run FFmpeg
-      await ffmpeg.exec(ffmpegArgs);
+      await ffmpeg.run(...ffmpegArgs);
 
       // Read output
-      const data = await ffmpeg.readFile(outputName);
+      const data = ffmpeg.FS('readFile', outputName);
       
       // Create download link
       const blob = new Blob([data.buffer], { type: 'video/mp4' });
