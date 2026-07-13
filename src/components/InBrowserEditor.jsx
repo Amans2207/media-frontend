@@ -77,7 +77,7 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
       
       formData.append('options', JSON.stringify(options));
       
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://media-backend-production-b846.up.railway.app';
       const response = await fetch(`${backendUrl}/api/editor/process`, {
         method: 'POST',
         body: formData
