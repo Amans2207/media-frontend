@@ -38,10 +38,10 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
     });
 
     try {
-      const baseURL = window.location.origin + '/ffmpeg';
+      const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
       await ffmpeg.load({
-        coreURL: `${baseURL}/ffmpeg-core.js?v=3`,
-        wasmURL: `${baseURL}/ffmpeg-core.wasm?v=3`,
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
       });
       setLoaded(true);
       setLoadingMsg('');
