@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import InBrowserEditor from './InBrowserEditor';
 
 const MediaLibrary = ({ themeColor, setCurrentTrack, playlist }) => {
   const [history, setHistory] = useState([]);
   const [playingFile, setPlayingFile] = useState(null);
   const [converting, setConverting] = useState(null);
+  const [editingFile, setEditingFile] = useState(null);
 
   useEffect(() => {
     // Load history from localStorage
@@ -197,6 +199,16 @@ const MediaLibrary = ({ themeColor, setCurrentTrack, playlist }) => {
                   <button onClick={() => handleConvert(item.filename, 'gif')} disabled={converting === item.filename} className="px-4 py-2 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 text-sm rounded-lg transition-colors border border-purple-500/30 disabled:opacity-50">
                     Make 15s GIF
                   </button>
+
+                  {(!item.filename.endsWith('.mp3') && !item.filename.endsWith('.m4a') && !item.filename.endsWith('.gif')) && (
+                    <button 
+                      onClick={() => setEditingFile({ url: `https://media-backend-production-b846.up.railway.app/api/serve/${item.filename}`, name: item.filename })} 
+                      className="px-4 py-2 bg-gradient-to-r from-pink-500/20 to-orange-500/20 text-pink-400 hover:from-pink-500/30 hover:to-orange-500/30 text-sm rounded-lg transition-colors border border-pink-500/30 flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" /></svg>
+                      Advanced Edit
+                    </button>
+                  )}
                   
                   {converting === item.filename && (
                     <span className="text-xs text-gray-400 self-center flex items-center gap-2 animate-pulse">
@@ -247,6 +259,15 @@ const MediaLibrary = ({ themeColor, setCurrentTrack, playlist }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* In-Browser Editor Modal */}
+      {editingFile && (
+        <InBrowserEditor 
+          fileUrl={editingFile.url} 
+          filename={editingFile.name} 
+          onClose={() => setEditingFile(null)} 
+        />
+      )}
     </div>
   );
 };
