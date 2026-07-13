@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { supabase } from '../supabaseClient';
 import toast from 'react-hot-toast';
+import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function AdminPanel({ onBack }) {
   const [activeTab, setActiveTab] = useState('users'); // users, activity, settings
@@ -23,6 +24,12 @@ export default function AdminPanel({ onBack }) {
   // Settings Data
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(true);
+
+  // Analytics Data
+  const [analytics, setAnalytics] = useState({ chart_data: [], pie_data: [] });
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+  
+  const COLORS = ['#8884d8', '#00C49F', '#FFBB28', '#FF8042'];
 
   // Fetching Functions
   const fetchUsers = async () => {
@@ -73,10 +80,27 @@ export default function AdminPanel({ onBack }) {
     }
   };
 
+  const fetchAnalytics = async () => {
+    try {
+      setLoadingAnalytics(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await axios.get('https://media-backend-production-b846.up.railway.app/api/admin/analytics', {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      setAnalytics(res.data);
+    } catch (error) {
+      toast.error('Failed to load analytics');
+    } finally {
+      setLoadingAnalytics(false);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchActivity();
     fetchSettings();
+    fetchAnalytics();
   }, []);
 
   const handleToggleMaintenance = async () => {
@@ -91,6 +115,20 @@ export default function AdminPanel({ onBack }) {
       toast.success(res.data.message, { id: 'maint' });
     } catch (error) {
       toast.error('Failed to toggle maintenance mode', { id: 'maint' });
+    }
+  };
+
+  const handleForceUpdate = async () => {
+    try {
+      toast.loading('Initiating system update...', { id: 'update' });
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/admin/system/update', 
+        {},
+        { headers: { Authorization: `Bearer ${session.access_token}` }}
+      );
+      toast.success(res.data.message, { id: 'update', duration: 5000 });
+    } catch (error) {
+      toast.error('Failed to trigger update', { id: 'update' });
     }
   };
 
@@ -216,14 +254,56 @@ export default function AdminPanel({ onBack }) {
 
         {/* Navigation Tabs */}
         <div className="flex space-x-2 mb-8 bg-white/5 p-1 rounded-xl w-full max-w-md border border-white/10">
-          <button onClick={() => setActiveTab('users')} className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'users' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>User Directory</button>
+          <button onClick={() => setActiveTab('users')} className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'users' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>Overview</button>
           <button onClick={() => setActiveTab('activity')} className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'activity' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>Activity Logs</button>
           <button onClick={() => setActiveTab('settings')} className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'settings' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>Settings</button>
         </div>
 
-        {/* Tab Content: USERS */}
+        {/* Tab Content: OVERVIEW (Users & Analytics) */}
         {activeTab === 'users' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Analytics Section */}
+            {!loadingAnalytics && analytics.chart_data.length > 0 && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
+                  <h3 className="text-gray-400 text-sm font-medium mb-4">Downloads (Last 7 Days)</h3>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={analytics.chart_data}>
+                        <XAxis dataKey="date" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                        <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }} />
+                        <Line type="monotone" dataKey="downloads" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', strokeWidth: 2 }} activeDot={{ r: 8 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
+                  <h3 className="text-gray-400 text-sm font-medium mb-4">Platform Usage</h3>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={analytics.pie_data} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                          {analytics.pie_data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-4 mt-2 text-xs text-gray-400">
+                    {analytics.pie_data.map((entry, index) => (
+                      <div key={entry.name} className="flex items-center gap-1">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                        {entry.name}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
@@ -402,6 +482,28 @@ export default function AdminPanel({ onBack }) {
                     className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${maintenanceMode ? 'bg-red-500' : 'bg-gray-600'}`}
                   >
                     <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${maintenanceMode ? 'translate-x-8' : 'translate-x-1'}`} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-6 mt-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-blue-400 flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                      Force Update Extractors
+                    </h3>
+                    <p className="text-gray-400 text-sm mt-2 max-w-md">
+                      If downloads from YouTube or Instagram suddenly stop working, the platforms likely changed their code. 
+                      Clicking this will force the backend to download the latest bypass scripts (yt-dlp) and restart automatically.
+                    </p>
+                  </div>
+                  
+                  <button 
+                    onClick={handleForceUpdate}
+                    className="px-4 py-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 rounded-xl font-medium transition-colors whitespace-nowrap"
+                  >
+                    Update Now
                   </button>
                 </div>
               </div>
