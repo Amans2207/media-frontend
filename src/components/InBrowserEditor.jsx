@@ -10,7 +10,8 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState(100);
   const [duration, setDuration] = useState(0);
-  const [crop, setCrop] = useState('none'); // none, 1:1, 9:16, 16:9
+  const [crop, setCrop] = useState('none');
+  const [fitMode, setFitMode] = useState('blur'); // none, 1:1, 9:16, 16:9
   const [mute, setMute] = useState(false);
   
   // Advanced Features
@@ -70,6 +71,7 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
         speed,
         videoFilter,
         mute,
+        fitMode,
         trimStart,
         trimEnd,
         duration
@@ -197,7 +199,7 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
           {/* Cropping */}
           <div className="bg-white/5 p-4 rounded-xl border border-white/5">
             <h3 className="text-sm font-semibold text-gray-300 mb-3">Crop Ratio</h3>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-3">
               {['none', '1:1', '9:16', '16:9'].map((ratio) => (
                 <button 
                   key={ratio}
@@ -208,6 +210,23 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
                 </button>
               ))}
             </div>
+            
+            {crop !== 'none' && (
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <h3 className="text-xs font-semibold text-gray-300 mb-2">Fit Strategy</h3>
+                <select 
+                  value={fitMode} 
+                  onChange={(e) => setFitMode(e.target.value)}
+                  className="w-full bg-black/50 border border-white/10 rounded-lg text-xs text-white p-2 focus:outline-none"
+                >
+                  <option value="blur">Premium Blurred Background</option>
+                  <option value="crop_center">Center Crop (Cut edges)</option>
+                  <option value="crop_left">Top/Left Crop</option>
+                  <option value="crop_right">Bottom/Right Crop</option>
+                  <option value="black_bars">Solid Black Bars</option>
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Advanced Filters */}
