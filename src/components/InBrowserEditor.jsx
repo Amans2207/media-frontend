@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import toast from 'react-hot-toast';
 
 export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [loaded, setLoaded] = useState(false);
-  const [loadingMsg, setLoadingMsg] = useState('Initializing Editor Engine...');
+  const [loadingMsg, setLoadingMsg] = useState('Editor Ready');
   const [progress, setProgress] = useState(0);
-  const ffmpegRef = useRef(createFFmpeg({ log: true }));
   const videoRef = useRef(null);
 
   const [trimStart, setTrimStart] = useState(0);
@@ -24,27 +22,9 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    loadFFmpeg();
+    // No loading required for backend processing
+    setLoaded(true);
   }, []);
-
-  const loadFFmpeg = async () => {
-    const ffmpeg = ffmpegRef.current;
-    
-    ffmpeg.setProgress(({ ratio }) => {
-      setProgress(Math.round(ratio * 100));
-    });
-
-    try {
-      if (!ffmpeg.isLoaded()) {
-        await ffmpeg.load();
-      }
-      setLoaded(true);
-      setLoadingMsg('');
-    } catch (e) {
-      console.error(e);
-      setLoadingMsg(`Engine Error: ${e.message || String(e)}`);
-    }
-  };
 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
@@ -75,104 +55,61 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const handleExport = async () => {
     try {
       setIsProcessing(true);
-      setProgress(0);
-      const ffmpeg = ffmpegRef.current;
+      setProgress(50); // Show fake progress while server processes
       
-      const inputName = 'input.mp4';
-      const outputName = 'output.mp4';
-      
-      // Write file to FFmpeg Virtual File System
-      ffmpeg.FS('writeFile', inputName, await fetchFile(fileUrl));
-
-      let ffmpegArgs = ['-i', inputName];
+      const formData = new FormData();
+      formData.append('fileUrl', fileUrl);
       
       if (customAudio) {
-        ffmpeg.FS('writeFile', 'audio.mp3', await fetchFile(customAudio));
-        ffmpegArgs.push('-i', 'audio.mp3');
-      }
-
-      // Video filters
-      let vfFilters = [];
-      if (crop !== 'none') {
-        if (crop === '1:1') vfFilters.push("crop=ih:ih"); // Square
-        else if (crop === '9:16') vfFilters.push("crop=ih*9/16:ih"); // Vertical
-        else if (crop === '16:9') vfFilters.push("crop=iw:iw*9/16"); // Horizontal
+        formData.append('audioFile', customAudio);
       }
       
-      if (reverse) {
-        vfFilters.push("reverse");
+      const options = {
+        crop,
+        reverse,
+        speed,
+        videoFilter,
+        mute,
+        trimStart,
+        trimEnd,
+        duration
+      };
+      
+      formData.append('options', JSON.stringify(options));
+      
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/editor/process`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to process video on server');
       }
       
-      if (speed !== 1.0) {
-        vfFilters.push(`setpts=${(1/speed).toFixed(2)}*PTS`);
-      }
+      const data = await response.json();
+      setProgress(100);
       
-      if (videoFilter === 'bw') {
-        vfFilters.push("colorchannelmixer=.3:.4:.3:0:.3:.4:.3:0:.3:.4:.3");
-      } else if (videoFilter === 'vibrant') {
-        vfFilters.push("eq=saturation=1.5");
-      } else if (videoFilter === 'blur') {
-        vfFilters.push("boxblur=5:1");
-      }
-
-      if (vfFilters.length > 0) {
-        ffmpegArgs.push('-vf', vfFilters.join(','));
-      }
-
-      // Audio Filters
-      let afFilters = [];
-      if (reverse) afFilters.push("areverse");
-      if (speed !== 1.0) afFilters.push(`atempo=${speed}`);
-      
-      // Trimming
-      if (trimStart > 0 || trimEnd < duration) {
-        ffmpegArgs.push('-ss', trimStart.toString());
-        ffmpegArgs.push('-to', trimEnd.toString());
-      }
-
-      // Audio handling
-      if (mute && !customAudio) {
-        ffmpegArgs.push('-an');
-      } else if (customAudio) {
-        // Map original video and new audio
-        ffmpegArgs.push('-map', '0:v:0', '-map', '1:a:0');
-        if (afFilters.length > 0) {
-           // We have to apply audio filters to the new audio track
-           ffmpegArgs.push('-af', afFilters.join(','));
-        }
-        ffmpegArgs.push('-shortest'); // End when shortest stream ends
+      if (data.success && data.fileUrl) {
+        const fullUrl = `${backendUrl}${data.fileUrl}`;
+        // Create download link
+        const link = document.createElement('a');
+        link.href = fullUrl;
+        link.download = `edited_${filename}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        toast.success("Video exported successfully!");
+        onClose();
       } else {
-        if (afFilters.length > 0) {
-           ffmpegArgs.push('-af', afFilters.join(','));
-        }
+        throw new Error("Invalid response from server");
       }
-
-      // Output Settings
-      ffmpegArgs.push('-c:v', 'libx264', '-preset', 'ultrafast', outputName);
-
-      // Run FFmpeg
-      await ffmpeg.run(...ffmpegArgs);
-
-      // Read output
-      const data = ffmpeg.FS('readFile', outputName);
-      
-      // Create download link
-      const blob = new Blob([data.buffer], { type: 'video/mp4' });
-      const url = URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `edited_${filename}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast.success("Video exported successfully!");
-      onClose();
       
     } catch (error) {
       console.error(error);
-      toast.error("An error occurred during editing.");
+      toast.error(error.message || "An error occurred during editing.");
     } finally {
       setIsProcessing(false);
     }
