@@ -124,6 +124,11 @@ const MediaLibrary = ({ themeColor, setCurrentTrack, playlist }) => {
       <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
         
         <AnimatePresence>
+          <motion.div initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}} className="bg-blue-500/10 border border-blue-500/30 text-blue-200 text-xs p-3 rounded-xl mb-2 flex items-start gap-2">
+            <svg className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span><strong>Info:</strong> Our website supports every format and works best! If you download a video and are unable to get audio, that means there is an error in that platform's database types, so try to download another video with the same audio.</span>
+          </motion.div>
+          
           <motion.div initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}} className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 text-xs p-3 rounded-xl mb-2 flex items-start gap-2">
             <svg className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             <span><strong>Auto-Delete Notice:</strong> Videos stored on the server will be automatically deleted after 30 minutes to free up space. Please use the <strong>Save File</strong> button to permanently save them to your device.</span>
