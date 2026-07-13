@@ -10,6 +10,10 @@ export default function AdminPanel({ onBack }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState('1 Month');
+  
+  // Advanced Features State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState('All');
 
   const fetchUsers = async () => {
     try {
@@ -48,7 +52,7 @@ export default function AdminPanel({ onBack }) {
       
       toast.success(`PRO (${selectedPlan}) granted to ${selectedUser.email}`, { id: 'grant' });
       setModalOpen(false);
-      fetchUsers(); // Refresh list
+      fetchUsers();
     } catch (error) {
       toast.error('Failed to grant PRO', { id: 'grant' });
     }
@@ -73,6 +77,84 @@ export default function AdminPanel({ onBack }) {
     }
   };
 
+  const handleToggleBan = async (user) => {
+    const action = user.is_banned ? 'unban' : 'ban';
+    if (!window.confirm(`Are you sure you want to ${action} ${user.email}?`)) return;
+    
+    try {
+      toast.loading(`Processing...`, { id: 'ban' });
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      await axios.post(`https://media-backend-production-b846.up.railway.app/api/admin/user/${user.id}/ban`, 
+        { ban_status: !user.is_banned },
+        { headers: { Authorization: `Bearer ${session.access_token}` }}
+      );
+      
+      toast.success(`User ${action}ned successfully!`, { id: 'ban' });
+      fetchUsers();
+    } catch (error) {
+      toast.error(`Failed to ${action} user`, { id: 'ban' });
+    }
+  };
+
+  const handleDeleteUser = async (user) => {
+    const confirmPrompt = window.prompt(`DANGER: Type "DELETE" to permanently remove ${user.email} from the database.`);
+    if (confirmPrompt !== "DELETE") {
+      toast.error('Deletion cancelled.');
+      return;
+    }
+    
+    try {
+      toast.loading(`Deleting account...`, { id: 'del' });
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      await axios.delete(`https://media-backend-production-b846.up.railway.app/api/admin/user/${user.id}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      
+      toast.success(`Account deleted permanently!`, { id: 'del' });
+      fetchUsers();
+    } catch (error) {
+      toast.error('Failed to delete account', { id: 'del' });
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (users.length === 0) return;
+    const headers = ['ID', 'Email', 'Joined', 'Last Login', 'PRO Status', 'Plan', 'Banned'];
+    const rows = users.map(u => [
+      u.id, 
+      u.email, 
+      u.created_at ? new Date(u.created_at).toISOString() : '', 
+      u.last_sign_in_at ? new Date(u.last_sign_in_at).toISOString() : '', 
+      u.is_pro ? 'YES' : 'NO', 
+      u.plan || 'None', 
+      u.is_banned ? 'YES' : 'NO'
+    ]);
+    
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `users_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('CSV Exported successfully!');
+  };
+
+  // Filter & Search Logic
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = u.email.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+    
+    if (filter === 'PRO') return u.is_pro;
+    if (filter === 'Free') return !u.is_pro;
+    if (filter === 'Banned') return u.is_banned;
+    return true; // All
+  });
+
   return (
     <div className="min-h-screen bg-[#050505] text-white p-6 relative overflow-hidden font-sans">
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/3" />
@@ -80,10 +162,10 @@ export default function AdminPanel({ onBack }) {
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/10">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 pb-6 border-b border-white/10 gap-4">
           <div>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
-              Admin Dashboard
+              Advanced Admin Dashboard
             </h1>
             <p className="text-gray-400 mt-1">Manage users, track activity, and control PRO access</p>
           </div>
@@ -106,6 +188,44 @@ export default function AdminPanel({ onBack }) {
             <h3 className="text-gray-400 text-sm font-medium">Active PRO Members</h3>
             <p className="text-4xl font-bold mt-2 text-yellow-400">{stats.pro}</p>
           </div>
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md relative overflow-hidden">
+             <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-red-500/20 to-transparent pointer-events-none" />
+            <h3 className="text-gray-400 text-sm font-medium">Banned Accounts</h3>
+            <p className="text-4xl font-bold mt-2 text-red-400">{users.filter(u => u.is_banned).length}</p>
+          </div>
+        </div>
+
+        {/* Action Bar */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+           <div className="flex items-center gap-4 w-full md:w-auto">
+             <input 
+               type="text" 
+               placeholder="Search email..." 
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+               className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm w-full md:w-64 outline-none focus:border-purple-500/50 transition-colors"
+             />
+             <select 
+               value={filter}
+               onChange={(e) => setFilter(e.target.value)}
+               className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-purple-500/50 appearance-none min-w-[120px]"
+             >
+               <option value="All" className="bg-[#111]">All Users</option>
+               <option value="PRO" className="bg-[#111]">PRO Only</option>
+               <option value="Free" className="bg-[#111]">Free Only</option>
+               <option value="Banned" className="bg-[#111]">Banned Only</option>
+             </select>
+           </div>
+           
+           <button 
+             onClick={handleExportCSV}
+             className="px-5 py-2.5 bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30 rounded-xl transition-all text-sm font-medium flex items-center gap-2 w-full md:w-auto justify-center"
+           >
+             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+             </svg>
+             Export CSV
+           </button>
         </div>
 
         {/* Users Table */}
@@ -131,14 +251,19 @@ export default function AdminPanel({ onBack }) {
                   <tr>
                     <td colSpan="6" className="px-6 py-12 text-center text-gray-400">Loading users...</td>
                   </tr>
-                ) : users.length === 0 ? (
+                ) : filteredUsers.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="px-6 py-12 text-center text-gray-400">No users found.</td>
                   </tr>
                 ) : (
-                  users.map(user => (
+                  filteredUsers.map(user => (
                     <tr key={user.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4">{user.email}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span className={user.is_banned ? "text-gray-500 line-through" : ""}>{user.email}</span>
+                          {user.is_banned && <span className="bg-red-500/20 text-red-500 text-[10px] font-bold px-1.5 py-0.5 rounded border border-red-500/30">BANNED</span>}
+                        </div>
+                      </td>
                       <td className="px-6 py-4">
                         {user.is_pro ? (
                           <span className="px-2.5 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-bold border border-yellow-500/30">PRO</span>
@@ -150,21 +275,49 @@ export default function AdminPanel({ onBack }) {
                       <td className="px-6 py-4 text-gray-400 text-sm">{new Date(user.created_at).toLocaleDateString()}</td>
                       <td className="px-6 py-4 text-gray-400 text-sm">{user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Never'}</td>
                       <td className="px-6 py-4 text-right">
-                        {user.is_pro ? (
+                        <div className="flex items-center justify-end gap-2">
+                          {/* PRO Management */}
+                          {user.is_pro ? (
+                            <button 
+                              onClick={() => handleRevokePro(user)}
+                              className="px-3 py-1.5 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 rounded-lg text-xs font-medium transition-colors border border-yellow-500/20"
+                              title="Revoke PRO"
+                            >
+                              - PRO
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => { setSelectedUser(user); setModalOpen(true); }}
+                              className="px-3 py-1.5 bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 rounded-lg text-xs font-medium transition-colors border border-purple-500/30"
+                              title="Grant PRO"
+                            >
+                              + PRO
+                            </button>
+                          )}
+                          
+                          {/* Ban Management */}
                           <button 
-                            onClick={() => handleRevokePro(user)}
-                            className="px-4 py-1.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg text-sm transition-colors border border-red-500/20"
+                            onClick={() => handleToggleBan(user)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                              user.is_banned 
+                                ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20' 
+                                : 'bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 border-orange-500/20'
+                            }`}
                           >
-                            Revoke PRO
+                            {user.is_banned ? 'Unban' : 'Ban'}
                           </button>
-                        ) : (
+                          
+                          {/* Delete Management */}
                           <button 
-                            onClick={() => { setSelectedUser(user); setModalOpen(true); }}
-                            className="px-4 py-1.5 bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 rounded-lg text-sm transition-colors border border-purple-500/30"
+                            onClick={() => handleDeleteUser(user)}
+                            className="px-2.5 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg text-xs transition-colors border border-red-500/20"
+                            title="Delete Account"
                           >
-                            Grant PRO
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   ))
