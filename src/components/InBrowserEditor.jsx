@@ -47,7 +47,7 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
       setLoadingMsg('');
     } catch (e) {
       console.error(e);
-      setLoadingMsg('Failed to load Editor Engine. Check internet connection.');
+      setLoadingMsg(`Engine Error: ${e.message || String(e)}`);
     }
   };
 
