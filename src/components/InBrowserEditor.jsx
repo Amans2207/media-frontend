@@ -3,6 +3,9 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import toast from 'react-hot-toast';
 
+import corePath from '@ffmpeg/core/dist/umd/ffmpeg-core.js?url';
+import wasmPath from '@ffmpeg/core/dist/umd/ffmpeg-core.wasm?url';
+
 export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [loaded, setLoaded] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState('Initializing Editor Engine...');
@@ -38,10 +41,9 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
     });
 
     try {
-      const baseURL = window.location.origin + '/ffmpeg';
       await ffmpeg.load({
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+        coreURL: await toBlobURL(corePath, 'text/javascript'),
+        wasmURL: await toBlobURL(wasmPath, 'application/wasm'),
       });
       setLoaded(true);
       setLoadingMsg('');
