@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import VideoDownloader from './components/VideoDownloader';
 import Login from './components/Login';
+import AdminPanel from './components/AdminPanel';
 import { supabase } from './supabaseClient';
 
 function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   useEffect(() => {
     // Get initial session
@@ -62,8 +64,12 @@ function App() {
     return <Login onLogin={() => {}} />; // onLogin not needed anymore as onAuthStateChange handles it
   }
 
+  if (showAdmin) {
+    return <AdminPanel onBack={() => setShowAdmin(false)} />;
+  }
+
   return (
-    <VideoDownloader session={session} />
+    <VideoDownloader session={session} onAdminClick={() => setShowAdmin(true)} isAdmin={session.user.email === 'as65012007@gmail.com'} />
   );
 }
 
