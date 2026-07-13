@@ -258,7 +258,11 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
                 <option value="none">None</option>
                 <option value="bw">Black & White</option>
                 <option value="vibrant">Vibrant Pop</option>
-                <option value="blur">Blur</option>
+                <option value="cinematic">Cinematic (Moody)</option>
+                <option value="sepia">Retro Sepia</option>
+                <option value="sharpen">Ultra Sharpen</option>
+                <option value="blur">Motion Blur</option>
+                <option value="invert">Invert Colors</option>
               </select>
             </div>
             
