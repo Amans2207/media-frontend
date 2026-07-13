@@ -12,11 +12,14 @@ function App() {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const initSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       setupAxios(session);
       setLoading(false);
-    });
+    };
+    
+    initSession();
 
     // Listen for auth changes
     const {
@@ -26,7 +29,23 @@ function App() {
       setupAxios(session);
     });
 
-    return () => subscription.unsubscribe();
+    // Force session refresh when app comes to foreground (fixes mobile sleep issues)
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setupAxios(session);
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleVisibilityChange);
+
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+    };
   }, []);
 
   const setupAxios = (session) => {
