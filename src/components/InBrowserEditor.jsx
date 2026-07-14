@@ -203,23 +203,6 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
                 </button>
               ))}
             </div>
-            
-            {crop !== 'none' && (
-              <div className="mt-4 pt-4 border-t border-white/10">
-                <h3 className="text-xs font-semibold text-gray-300 mb-2">Fit Strategy</h3>
-                <select 
-                  value={fitMode} 
-                  onChange={(e) => setFitMode(e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded-lg text-xs text-white p-2 focus:outline-none"
-                >
-                  <option value="blur">Premium Blurred Background</option>
-                  <option value="crop_center">Center Crop (Cut edges)</option>
-                  <option value="crop_left">Top/Left Crop</option>
-                  <option value="crop_right">Bottom/Right Crop</option>
-                  <option value="black_bars">Solid Black Bars</option>
-                </select>
-              </div>
-            )}
           </div>
 
           {/* Advanced Filters */}
