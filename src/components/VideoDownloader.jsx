@@ -5,6 +5,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import SnippetCutter from './SnippetCutter';
 import MediaLibrary from './MediaLibrary';
 import GlobalAudioPlayer from './GlobalAudioPlayer';
+import InBrowserEditor from './InBrowserEditor';
 import { QRCodeSVG } from 'qrcode.react';
 import Confetti from 'react-confetti';
 import Tilt from 'react-parallax-tilt';
@@ -100,6 +101,7 @@ const BackgroundElements = ({ themeColor }) => {
 const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
   const is_pro = session?.user?.user_metadata?.is_pro === true;
   const [showProModal, setShowProModal] = useState(false);
+  const [showStudio, setShowStudio] = useState(false);
   const [activeTab, setActiveTab] = useState('youtube'); // youtube, instagram, playlist, batch
   const [url, setUrl] = useState('');
   const [batchUrls, setBatchUrls] = useState('');
@@ -714,6 +716,16 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
               Install App to Home Screen
             </motion.button>
           )}
+
+          <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowStudio(true)}
+              className="mt-6 px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 rounded-full font-extrabold shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all mx-auto flex items-center justify-center gap-3 text-white border border-white/20"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" /></svg>
+              Open Advanced Editor Studio 🎬
+            </motion.button>
         </div>
 
         {/* Tab Navigation */}
@@ -1336,6 +1348,10 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {showStudio && (
+        <InBrowserEditor fileUrl="" onClose={() => setShowStudio(false)} />
+      )}
     </div>
   );
 };
