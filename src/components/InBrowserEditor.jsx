@@ -25,6 +25,11 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [customAudioStart, setCustomAudioStart] = useState(0);
   const [customAudioOffset, setCustomAudioOffset] = useState(0);
   const [customAudioEnhance, setCustomAudioEnhance] = useState(false);
+    
+  // Pro Export Features
+  const [exportFormat, setExportFormat] = useState('mp4'); // mp4, gif, mp3
+  const [removeWatermark, setRemoveWatermark] = useState(false);
+  const [compressWhatsApp, setCompressWhatsApp] = useState(false);
   
   const [customVideo, setCustomVideo] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(fileUrl || '');
@@ -90,7 +95,10 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
         duration,
         customAudioStart,
         customAudioOffset,
-        customAudioEnhance
+        customAudioEnhance,
+        exportFormat,
+        removeWatermark,
+        compressWhatsApp
       };
       
       formData.append('options', JSON.stringify(options));
@@ -335,14 +343,55 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
 
           {/* Options */}
           <div className="flex gap-2 text-xs">
-            <label className="flex items-center gap-2 cursor-pointer bg-white/5 p-2 rounded-xl border border-white/5 flex-1">
+            <label className="flex items-center gap-1 cursor-pointer">
               <input type="checkbox" checked={mute} onChange={(e) => setMute(e.target.checked)} className="rounded bg-black/50 border-white/20 text-purple-500 focus:ring-0" />
-              <span className="text-gray-300">Mute Audio</span>
+              <span className="text-gray-300">Mute Source</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer bg-white/5 p-2 rounded-xl border border-white/5 flex-1">
+            <label className="flex items-center gap-1 cursor-pointer">
               <input type="checkbox" checked={reverse} onChange={(e) => setReverse(e.target.checked)} className="rounded bg-black/50 border-white/20 text-blue-500 focus:ring-0" />
               <span className="text-gray-300">Reverse Video</span>
             </label>
+          </div>
+
+          {/* Pro Export Tools */}
+          <div className="bg-black/40 p-4 rounded-xl border border-purple-500/20">
+            <h3 className="text-sm font-bold text-purple-400 mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              Pro Export Settings
+            </h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Export Format</label>
+                <select 
+                  value={exportFormat} 
+                  onChange={(e) => setExportFormat(e.target.value)}
+                  className="w-full bg-black/50 border border-white/10 rounded-lg text-xs text-white p-2 focus:outline-none focus:border-purple-500/50"
+                >
+                  <option value="mp4">MP4 (High Quality Video)</option>
+                  <option value="gif">GIF (Meme Animation)</option>
+                  <option value="mp3">MP3 (Audio / Ringtone)</option>
+                </select>
+              </div>
+
+              <label className="flex items-center justify-between cursor-pointer group">
+                <span className="text-xs text-gray-300 group-hover:text-white transition-colors font-medium">Remove Watermark (Auto Blur)</span>
+                <div className="relative">
+                  <input type="checkbox" className="sr-only" checked={removeWatermark} onChange={(e) => setRemoveWatermark(e.target.checked)} />
+                  <div className={`block w-10 h-6 rounded-full transition-colors ${removeWatermark ? 'bg-purple-500' : 'bg-gray-700'}`}></div>
+                  <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${removeWatermark ? 'transform translate-x-4' : ''}`}></div>
+                </div>
+              </label>
+
+              <label className="flex items-center justify-between cursor-pointer group">
+                <span className="text-xs text-gray-300 group-hover:text-white transition-colors font-medium">WhatsApp Optimizer (Max 16MB)</span>
+                <div className="relative">
+                  <input type="checkbox" className="sr-only" checked={compressWhatsApp} onChange={(e) => setCompressWhatsApp(e.target.checked)} />
+                  <div className={`block w-10 h-6 rounded-full transition-colors ${compressWhatsApp ? 'bg-green-500' : 'bg-gray-700'}`}></div>
+                  <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${compressWhatsApp ? 'transform translate-x-4' : ''}`}></div>
+                </div>
+              </label>
+            </div>
           </div>
 
           {/* Export Button */}
