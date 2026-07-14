@@ -771,7 +771,7 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
               <div className="mt-4">
                 <label className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2 block px-2">Quality</label>
                 <select value={quality} onChange={(e) => setQuality(e.target.value)} className="w-full px-4 py-3 bg-black/50 text-white rounded-xl focus:outline-none cursor-pointer">
-                  <option value="4k" className="bg-gray-900 font-bold text-yellow-400">4K Max (Merged) 👑 PRO</option>
+                  <option value="4k" className="bg-gray-900 font-bold text-yellow-400">8K AI Upscale (Merged) 🚀 PRO</option>
                   <option value="best" className="bg-gray-900">Highest Quality</option>
                   <option value="720p" className="bg-gray-900">720p</option>
                   <option value="audio" className="bg-gray-900">Audio Only (MP3/M4A)</option>
@@ -806,6 +806,10 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
                     <option value="vibrant" className="bg-gray-900">Vibrant (High Saturation)</option>
                     <option value="bw" className="bg-gray-900">Black & White (Vintage)</option>
                     <option value="sepia" className="bg-gray-900">Sepia (Retro)</option>
+                    <option value="cyberpunk" className="bg-gray-900">Cyberpunk (Neon)</option>
+                    <option value="warm" className="bg-gray-900">Warm & Cozy (Sunset)</option>
+                    <option value="matrix" className="bg-gray-900">The Matrix (Hacker Green)</option>
+                    <option value="vaporwave" className="bg-gray-900">Vaporwave (Synthwave)</option>
                   </select>
                 </div>
                 
@@ -835,7 +839,6 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
         )}
 
         {step === 1.5 && (
-          // Skeleton Loader UI
           <div className="flex flex-col gap-6 animate-pulse">
             <div className="flex items-start gap-4 p-5 bg-black/30 rounded-2xl border border-white/5">
               <div className="w-28 h-20 bg-white/10 rounded-xl" />
@@ -939,7 +942,7 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
                     onChange={(e) => setQuality(e.target.value)}
                     className="w-full px-4 py-3 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none transition-all cursor-pointer"
                   >
-                    <option value="4k" className="bg-gray-900 font-bold text-yellow-400">🔥 4K Max Quality (Merged) 👑 PRO</option>
+                    <option value="4k" className="bg-gray-900 font-bold text-yellow-400">🚀 8K AI Max Quality (Merged) 🚀 PRO</option>
                     <option value="best" className="bg-gray-900">Highest Quality (Video + Audio)</option>
                     <option value="720p" className="bg-gray-900">720p (Good Quality)</option>
                     <option value="audio" className="bg-gray-900">Audio Only (MP3/M4A)</option>
@@ -978,6 +981,10 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
                       <option value="vibrant" className="bg-gray-900">Vibrant (High Saturation)</option>
                       <option value="bw" className="bg-gray-900">Black & White (Vintage)</option>
                       <option value="sepia" className="bg-gray-900">Sepia (Retro)</option>
+                      <option value="cyberpunk" className="bg-gray-900">Cyberpunk (Neon)</option>
+                      <option value="warm" className="bg-gray-900">Warm & Cozy (Sunset)</option>
+                      <option value="matrix" className="bg-gray-900">The Matrix (Hacker Green)</option>
+                      <option value="vaporwave" className="bg-gray-900">Vaporwave (Synthwave)</option>
                     </select>
                   </div>
                   
