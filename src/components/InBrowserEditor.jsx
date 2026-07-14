@@ -86,26 +86,60 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
       }
       
       const options = {
-        crop,
-        reverse,
-        speed,
-        videoFilter,
-        mute,
-        trimStart,
-        trimEnd,
-        duration,
-        customAudioStart,
-        customAudioOffset,
-        customAudioEnhance,
-        exportFormat,
-        removeWatermark,
-        compressWhatsApp,
-        autoCaptions
-      };
-      
-      formData.append('options', JSON.stringify(options));
-      
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://media-backend-production-b846.up.railway.app';
+          crop,
+          reverse,
+          speed,
+          videoFilter,
+          mute,
+          trimStart,
+          trimEnd,
+          duration,
+          customAudioStart,
+          customAudioOffset,
+          customAudioEnhance,
+          exportFormat,
+          removeWatermark,
+          compressWhatsApp,
+          autoCaptions,
+          originalUrl: fileUrl // Fallback original URL if present
+        };
+        
+        formData.append('options', JSON.stringify(options));
+        
+        // --- SMART CAPTIONS ENGINE ---
+        if (autoCaptions && customVideo && duration > 120) {
+          // Video is local and > 2 minutes: Use Browser AI
+          setLoadingMsg("Generating Captions locally (Browser AI)...");
+          const { extractAndResampleAudio, formatToSRT } = await import('../utils/BrowserAI.js');
+          
+          try {
+            const float32Array = await extractAndResampleAudio(customVideo);
+            const worker = new Worker(new URL('../worker.js', import.meta.url), { type: 'module' });
+            
+            const clientSrt = await new Promise((resolve, reject) => {
+                worker.addEventListener('message', (e) => {
+                    if (e.data.status === 'complete') {
+                        resolve(formatToSRT(e.data.output.chunks || e.data.output));
+                    } else if (e.data.status === 'error') {
+                        reject(e.data.error);
+                    } else if (e.data.status === 'progress') {
+                        setProgress(prev => prev < 90 ? prev + 1 : 90);
+                    }
+                });
+                worker.postMessage({ audio: float32Array, id: 1 });
+            });
+            
+            if (clientSrt) {
+              formData.append('clientSrt', clientSrt);
+            }
+          } catch(err) {
+            console.error("Browser AI failed:", err);
+            // It will fallback to backend Vosk AI silently!
+          }
+          setLoadingMsg("Uploading to server...");
+        }
+        
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://media-backend-production-b846.up.railway.app';
       const response = await axios.post(`${backendUrl}/api/editor/process`, formData);
       const data = response.data;
       
