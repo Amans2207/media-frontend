@@ -26,6 +26,9 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [customAudioOffset, setCustomAudioOffset] = useState(0);
   const [customAudioEnhance, setCustomAudioEnhance] = useState(false);
   
+  const [customVideo, setCustomVideo] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(fileUrl || '');
+  
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -65,7 +68,12 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
       setProgress(50); // Show fake progress while server processes
       
       const formData = new FormData();
-      formData.append('fileUrl', fileUrl);
+      if (fileUrl) {
+          formData.append('fileUrl', fileUrl);
+      }
+      if (customVideo) {
+          formData.append('videoFile', customVideo);
+      }
       
       if (customAudio) {
         formData.append('audioFile', customAudio);
@@ -135,17 +143,42 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
             </div>
           )}
           
-          <video 
-            ref={videoRef}
-            src={fileUrl} 
-            controls 
-            className="max-w-full max-h-[400px] rounded-lg shadow-lg"
-            onLoadedMetadata={handleLoadedMetadata}
-            crossOrigin="anonymous"
-          />
+          {previewUrl ? (
+            <video 
+              ref={videoRef}
+              src={previewUrl} 
+              controls 
+              className="max-w-full max-h-[400px] rounded-lg shadow-lg"
+              onLoadedMetadata={handleLoadedMetadata}
+              crossOrigin="anonymous"
+            />
+          ) : (
+            <div className="w-full h-[400px] bg-white/5 rounded-lg border border-white/10 flex flex-col items-center justify-center text-gray-400">
+                <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                <p>No video selected</p>
+            </div>
+          )}
+          
+          <div className="mt-6 w-full flex flex-col gap-3">
+            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Upload Video (Bypass History)</label>
+            <input 
+              type="file" 
+              accept="video/*" 
+              onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                      const file = e.target.files[0];
+                      setCustomVideo(file);
+                      setPreviewUrl(URL.createObjectURL(file));
+                  }
+              }}
+              className="w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-500/20 file:text-purple-400 hover:file:bg-purple-500/30 transition-all cursor-pointer bg-black/20 border border-white/10 p-2 rounded-xl"
+            />
+          </div>
+
           <button 
             onClick={handleSnapshot}
-            className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-sm font-medium rounded-lg text-white flex items-center gap-2 transition-colors border border-white/10"
+            disabled={!previewUrl}
+            className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-sm font-medium rounded-lg text-white flex items-center gap-2 transition-colors border border-white/10 disabled:opacity-50"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             Capture Frame
