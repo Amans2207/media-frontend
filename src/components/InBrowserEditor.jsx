@@ -21,6 +21,11 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [reverse, setReverse] = useState(false);
   const [customAudio, setCustomAudio] = useState(null);
   
+  // Custom Audio Advanced Controls
+  const [customAudioStart, setCustomAudioStart] = useState(0);
+  const [customAudioOffset, setCustomAudioOffset] = useState(0);
+  const [customAudioEnhance, setCustomAudioEnhance] = useState(false);
+  
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -72,10 +77,12 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
         speed,
         videoFilter,
         mute,
-        fitMode,
         trimStart,
         trimEnd,
-        duration
+        duration,
+        customAudioStart,
+        customAudioOffset,
+        customAudioEnhance
       };
       
       formData.append('options', JSON.stringify(options));
@@ -251,6 +258,46 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
                 onChange={(e) => setCustomAudio(e.target.files[0])}
                 className="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-500/20 file:text-purple-300 hover:file:bg-purple-500/30"
               />
+              
+              {customAudio && (
+                <div className="mt-4 p-3 bg-black/40 rounded-xl border border-white/5 flex flex-col gap-3">
+                  <div>
+                    <label className="text-xs text-gray-400 flex justify-between mb-1">
+                      <span>Audio Start Time (Skip Intro)</span>
+                      <span className="text-purple-400 font-mono">{customAudioStart}s</span>
+                    </label>
+                    <input 
+                      type="range" min="0" max="60" step="1" 
+                      value={customAudioStart} 
+                      onChange={(e) => setCustomAudioStart(parseFloat(e.target.value))}
+                      className="w-full accent-purple-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="text-xs text-gray-400 flex justify-between mb-1">
+                      <span>Delay Audio (Start at Video Time)</span>
+                      <span className="text-blue-400 font-mono">{customAudioOffset}s</span>
+                    </label>
+                    <input 
+                      type="range" min="0" max="60" step="1" 
+                      value={customAudioOffset} 
+                      onChange={(e) => setCustomAudioOffset(parseFloat(e.target.value))}
+                      className="w-full accent-blue-500"
+                    />
+                  </div>
+                  
+                  <label className="flex items-center gap-2 mt-1 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={customAudioEnhance} 
+                      onChange={(e) => setCustomAudioEnhance(e.target.checked)} 
+                      className="rounded bg-black/50 border-white/20 text-purple-500 focus:ring-0" 
+                    />
+                    <span className="text-xs text-gray-300 font-medium">✨ Pro Audio Polish (Bass, 3D Stereo, Crispness)</span>
+                  </label>
+                </div>
+              )}
             </div>
           </div>
 
