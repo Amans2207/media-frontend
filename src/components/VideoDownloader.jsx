@@ -802,14 +802,12 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
                   <label className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2 block px-2">Video Filter</label>
                   <select value={videoFilter} onChange={(e) => setVideoFilter(e.target.value)} className="w-full px-4 py-3 bg-black/50 text-white rounded-xl focus:outline-none cursor-pointer">
                     <option value="none" className="bg-gray-900">None (Original)</option>
-                    <option value="cinematic" className="bg-gray-900">Cinematic (Pro Color)</option>
-                    <option value="vibrant" className="bg-gray-900">Vibrant (High Saturation)</option>
-                    <option value="bw" className="bg-gray-900">Black & White (Vintage)</option>
-                    <option value="sepia" className="bg-gray-900">Sepia (Retro)</option>
-                    <option value="cyberpunk" className="bg-gray-900">Cyberpunk (Neon)</option>
-                    <option value="warm" className="bg-gray-900">Warm & Cozy (Sunset)</option>
-                    <option value="matrix" className="bg-gray-900">The Matrix (Hacker Green)</option>
-                    <option value="vaporwave" className="bg-gray-900">Vaporwave (Synthwave)</option>
+                    <option value="cinematic_pro" className="bg-gray-900">Cinematic Pro (Teal & Orange)</option>
+                    <option value="vintage_film" className="bg-gray-900">Vintage Film (Grain & Sepia)</option>
+                    <option value="vhs_glitch" className="bg-gray-900">VHS Glitch (Retro Tape)</option>
+                    <option value="moody_dark" className="bg-gray-900">Moody Dark (Aesthetic)</option>
+                    <option value="dreamy_bloom" className="bg-gray-900">Dreamy Bloom (Halation Glow)</option>
+                    <option value="hdr_pro" className="bg-gray-900">HDR Ultra (Crisp Details)</option>
                   </select>
                 </div>
                 
@@ -977,14 +975,12 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
                       className="w-full px-4 py-3 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none transition-all cursor-pointer"
                     >
                       <option value="none" className="bg-gray-900">None (Original)</option>
-                      <option value="cinematic" className="bg-gray-900">Cinematic (Pro Color)</option>
-                      <option value="vibrant" className="bg-gray-900">Vibrant (High Saturation)</option>
-                      <option value="bw" className="bg-gray-900">Black & White (Vintage)</option>
-                      <option value="sepia" className="bg-gray-900">Sepia (Retro)</option>
-                      <option value="cyberpunk" className="bg-gray-900">Cyberpunk (Neon)</option>
-                      <option value="warm" className="bg-gray-900">Warm & Cozy (Sunset)</option>
-                      <option value="matrix" className="bg-gray-900">The Matrix (Hacker Green)</option>
-                      <option value="vaporwave" className="bg-gray-900">Vaporwave (Synthwave)</option>
+                      <option value="cinematic_pro" className="bg-gray-900">Cinematic Pro (Teal & Orange)</option>
+                      <option value="vintage_film" className="bg-gray-900">Vintage Film (Grain & Sepia)</option>
+                      <option value="vhs_glitch" className="bg-gray-900">VHS Glitch (Retro Tape)</option>
+                      <option value="moody_dark" className="bg-gray-900">Moody Dark (Aesthetic)</option>
+                      <option value="dreamy_bloom" className="bg-gray-900">Dreamy Bloom (Halation Glow)</option>
+                      <option value="hdr_pro" className="bg-gray-900">HDR Ultra (Crisp Details)</option>
                     </select>
                   </div>
                   

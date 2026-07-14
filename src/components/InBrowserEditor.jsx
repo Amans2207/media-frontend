@@ -238,15 +238,14 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
                 onChange={(e) => setVideoFilter(e.target.value)}
                 className="w-full bg-black/50 border border-white/10 rounded-lg text-xs text-white p-2 focus:outline-none"
               >
-                <option value="none">None</option>
-                <option value="bw">Black & White</option>
-                <option value="vibrant">Vibrant Pop</option>
-                <option value="cinematic">Cinematic (Moody)</option>
-                <option value="sepia">Retro Sepia</option>
-                <option value="sharpen">Ultra Sharpen</option>
-                <option value="blur">Motion Blur</option>
-                <option value="invert">Invert Colors</option>
-              </select>
+                  <option value="none">None</option>
+                  <option value="cinematic_pro">Cinematic Pro (Teal & Orange)</option>
+                  <option value="vintage_film">Vintage Film (Grain & Sepia)</option>
+                  <option value="vhs_glitch">VHS Glitch (Retro Tape)</option>
+                  <option value="moody_dark">Moody Dark (Aesthetic)</option>
+                  <option value="dreamy_bloom">Dreamy Bloom (Halation Glow)</option>
+                  <option value="hdr_pro">HDR Ultra (Crisp Details)</option>
+                </select>
             </div>
             
             {/* Custom Music */}
