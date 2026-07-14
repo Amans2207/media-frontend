@@ -437,6 +437,7 @@ export default function AdminPanel({ onBack }) {
                             </div>
                           </td>
                         </tr>
+                        );
                       })
                     )}
                   </tbody>
@@ -508,7 +509,8 @@ export default function AdminPanel({ onBack }) {
                             </div>
                           </td>
                         </tr>
-                      )})
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
