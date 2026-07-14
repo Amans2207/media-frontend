@@ -104,6 +104,8 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
   const [url, setUrl] = useState('');
   const [batchUrls, setBatchUrls] = useState('');
   const [quality, setQuality] = useState('best');
+  const [videoFilter, setVideoFilter] = useState('none');
+  const [stereoSound, setStereoSound] = useState(false);
   const [lofiSpeed, setLofiSpeed] = useState(0.85);
   const [step, setStep] = useState(1);
   const [videoInfo, setVideoInfo] = useState(null);
@@ -429,9 +431,11 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
     
     setIsLoading(true);
     try {
-      const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/download', {
-        urls, quality, ...(quality === 'lofi_audio' && { lofi_speed: lofiSpeed })
-      });
+      const payload = {
+        urls, quality, video_filter: videoFilter, stereo_sound: stereoSound,
+        ...(quality === 'lofi_audio' && { lofi_speed: lofiSpeed })
+      };
+      const res = await axios.post('https://media-backend-production-b846.up.railway.app/api/download', payload);
       
       const initialTasks = {};
       res.data.tasks.forEach((tid, i) => {
@@ -470,7 +474,7 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
 
     setIsLoading(true);
     try {
-      let payload = { quality };
+      let payload = { quality, video_filter: videoFilter, stereo_sound: stereoSound };
       if (quality === 'lofi_audio') {
         payload.lofi_speed = lofiSpeed;
       }
@@ -792,9 +796,33 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
                     </div>
                   </div>
                 )}
+                </div>
+                
+                <div className="mt-4">
+                  <label className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2 block px-2">Video Filter</label>
+                  <select value={videoFilter} onChange={(e) => setVideoFilter(e.target.value)} className="w-full px-4 py-3 bg-black/50 text-white rounded-xl focus:outline-none cursor-pointer">
+                    <option value="none" className="bg-gray-900">None (Original)</option>
+                    <option value="cinematic" className="bg-gray-900">Cinematic (Pro Color)</option>
+                    <option value="vibrant" className="bg-gray-900">Vibrant (High Saturation)</option>
+                    <option value="bw" className="bg-gray-900">Black & White (Vintage)</option>
+                    <option value="sepia" className="bg-gray-900">Sepia (Retro)</option>
+                  </select>
+                </div>
+                
+                {quality === '4k' && (
+                  <div className="mt-4 bg-black/30 p-3 rounded-xl border border-white/5 flex items-center justify-between">
+                    <div>
+                       <label className="text-sm text-gray-200 font-bold tracking-wide">Enable Stereo Sound</label>
+                       <p className="text-[10px] text-gray-500 mt-1">Immersive 2-channel audio widening</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked={stereoSound} onChange={e => setStereoSound(e.target.checked)} className="sr-only peer" />
+                      <div className={"w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"} style={stereoSound ? {backgroundColor: themeColor} : {}}></div>
+                    </label>
+                  </div>
+                )}
               </div>
-            </div>
-            <motion.button 
+              <motion.button 
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               disabled={isLoading || !batchUrls}
               type="submit"
@@ -936,9 +964,37 @@ const VideoDownloader = ({ session, isAdmin, onAdminClick }) => {
                       </div>
                     </div>
                   )}
-                </div>
+                  </div>
 
-                {!videoInfo.is_playlist && (activeTab === 'youtube' || activeTab === 'instagram') && (
+                  <div className="bg-black/20 p-5 rounded-2xl border border-white/5 mt-4">
+                    <label className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2 block">Video Filter</label>
+                    <select
+                      value={videoFilter}
+                      onChange={(e) => setVideoFilter(e.target.value)}
+                      className="w-full px-4 py-3 bg-black/40 text-white rounded-xl border border-white/10 focus:outline-none transition-all cursor-pointer"
+                    >
+                      <option value="none" className="bg-gray-900">None (Original)</option>
+                      <option value="cinematic" className="bg-gray-900">Cinematic (Pro Color)</option>
+                      <option value="vibrant" className="bg-gray-900">Vibrant (High Saturation)</option>
+                      <option value="bw" className="bg-gray-900">Black & White (Vintage)</option>
+                      <option value="sepia" className="bg-gray-900">Sepia (Retro)</option>
+                    </select>
+                  </div>
+                  
+                  {quality === '4k' && (
+                    <div className="mt-4 bg-black/20 p-5 rounded-2xl border border-white/5 flex items-center justify-between">
+                      <div>
+                         <label className="text-sm text-gray-200 font-bold tracking-wide">Enable Stereo Sound</label>
+                         <p className="text-xs text-gray-500 mt-1">Immersive 2-channel audio widening</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked={stereoSound} onChange={e => setStereoSound(e.target.checked)} className="sr-only peer" />
+                        <div className={"w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"} style={stereoSound ? {backgroundColor: themeColor} : {}}></div>
+                      </label>
+                    </div>
+                  )}
+  
+                  {!videoInfo.is_playlist && (activeTab === 'youtube' || activeTab === 'instagram') && (
                   <div className="bg-black/20 p-5 rounded-2xl border border-white/5 mt-4">
                     <div className="flex items-center justify-between">
                        <label className="flex items-center gap-3 cursor-pointer">
