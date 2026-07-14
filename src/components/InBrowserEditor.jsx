@@ -109,20 +109,44 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
       const response = await axios.post(`${backendUrl}/api/editor/process`, formData);
       const data = response.data;
       
-      setProgress(100);
-      
-      if (data.success && data.fileUrl) {
-        const fullUrl = `${backendUrl}${data.fileUrl}?download=true`;
-        // Create download link
-        const link = document.createElement('a');
-        link.href = fullUrl;
-        link.download = `edited_${filename}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      if (data.success && data.task_id) {
+        const taskId = data.task_id;
+        setProgress(10);
         
-        toast.success("Video exported successfully!");
-        onClose();
+        const pollStatus = async () => {
+          try {
+            const statusRes = await axios.get(`${backendUrl}/api/editor/status/${taskId}`);
+            const statusData = statusRes.data;
+            
+            if (statusData.status === 'completed') {
+              setProgress(100);
+              const fullUrl = `${backendUrl}${statusData.fileUrl}?download=true`;
+              const link = document.createElement('a');
+              link.href = fullUrl;
+              link.download = `edited_${filename}`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              
+              toast.success("Video exported successfully!");
+              setIsProcessing(false);
+              onClose();
+            } else if (statusData.status === 'error') {
+              setIsProcessing(false);
+              toast.error(statusData.error || "Server processing failed");
+            } else {
+              // Still processing
+              setProgress(prev => prev >= 95 ? 95 : prev + 5); // Fake progress
+              setTimeout(pollStatus, 3000);
+            }
+          } catch (e) {
+            console.error("Polling error:", e);
+            setTimeout(pollStatus, 3000);
+          }
+        };
+        
+        setTimeout(pollStatus, 3000);
+        return; // Don't reset isProcessing in finally block yet
       } else {
         throw new Error("Invalid response from server");
       }
@@ -130,9 +154,8 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
     } catch (error) {
       console.error(error);
       toast.error(error.message || "An error occurred during editing.");
-    } finally {
       setIsProcessing(false);
-    }
+    } // No finally block, handled inside success/error paths
   };
 
   return (
