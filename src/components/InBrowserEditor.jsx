@@ -94,7 +94,7 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
       setProgress(100);
       
       if (data.success && data.fileUrl) {
-        const fullUrl = `${backendUrl}${data.fileUrl}`;
+        const fullUrl = `${backendUrl}${data.fileUrl}?download=true`;
         // Create download link
         const link = document.createElement('a');
         link.href = fullUrl;
