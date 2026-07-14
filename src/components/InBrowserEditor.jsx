@@ -30,6 +30,7 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [exportFormat, setExportFormat] = useState('mp4'); // mp4, gif, mp3
   const [removeWatermark, setRemoveWatermark] = useState(false);
   const [compressWhatsApp, setCompressWhatsApp] = useState(false);
+  const [autoCaptions, setAutoCaptions] = useState(false);
   
   const [customVideo, setCustomVideo] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(fileUrl || '');
@@ -98,7 +99,8 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
         customAudioEnhance,
         exportFormat,
         removeWatermark,
-        compressWhatsApp
+        compressWhatsApp,
+        autoCaptions
       };
       
       formData.append('options', JSON.stringify(options));
@@ -389,6 +391,15 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
                   <input type="checkbox" className="sr-only" checked={compressWhatsApp} onChange={(e) => setCompressWhatsApp(e.target.checked)} />
                   <div className={`block w-10 h-6 rounded-full transition-colors ${compressWhatsApp ? 'bg-green-500' : 'bg-gray-700'}`}></div>
                   <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${compressWhatsApp ? 'transform translate-x-4' : ''}`}></div>
+                </div>
+              </label>
+
+              <label className="flex items-center justify-between cursor-pointer group">
+                <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 font-bold">✨ AI Auto Captions (TikTok Style)</span>
+                <div className="relative">
+                  <input type="checkbox" className="sr-only" checked={autoCaptions} onChange={(e) => setAutoCaptions(e.target.checked)} />
+                  <div className={`block w-10 h-6 rounded-full transition-colors ${autoCaptions ? 'bg-gradient-to-r from-blue-500 to-purple-600' : 'bg-gray-700'}`}></div>
+                  <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${autoCaptions ? 'transform translate-x-4' : ''}`}></div>
                 </div>
               </label>
             </div>
