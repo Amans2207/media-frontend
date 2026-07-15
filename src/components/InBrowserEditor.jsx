@@ -107,6 +107,16 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
                         resolve(formatToSRT(e.data.output.chunks || e.data.output));
                     } else if (e.data.status === 'error') {
                         reject(e.data.error);
+                    } else if (e.data.status === 'progress') {
+                        // Show model download progress
+                        const progData = e.data.data;
+                        if (progData && progData.status === 'progress') {
+                            setLoadingMsg(`Downloading AI Model (${Math.round(progData.progress)}%)...`);
+                        } else if (progData && progData.status === 'ready') {
+                            setLoadingMsg("AI Model ready. Transcribing audio (this may take a minute)...");
+                        }
+                    } else if (e.data.status === 'processing') {
+                        setLoadingMsg("Transcribing audio (this may take a minute)...");
                     }
                 });
                 worker.postMessage({ audio: float32Array, id: 1 });
