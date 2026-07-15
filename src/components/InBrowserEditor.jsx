@@ -35,6 +35,9 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const [customVideo, setCustomVideo] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(fileUrl || '');
   
+  const [videoWidth, setVideoWidth] = useState(1080);
+  const [videoHeight, setVideoHeight] = useState(1920);
+  
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -44,9 +47,10 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
-      const dur = videoRef.current.duration;
-      setDuration(dur);
-      setTrimEnd(dur);
+      setDuration(videoRef.current.duration);
+      setVideoWidth(videoRef.current.videoWidth || 1080);
+      setVideoHeight(videoRef.current.videoHeight || 1920);
+      setTrimEnd(videoRef.current.duration);
     }
   };
 
@@ -89,6 +93,8 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
           removeWatermark,
           compressWhatsApp,
           autoCaptions,
+          videoWidth,
+          videoHeight,
       };
       
       let clientSrt = null;

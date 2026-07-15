@@ -75,7 +75,20 @@ export const runClientSideFFmpeg = async (videoFileOrUrl, options, setProgress) 
 
     // 1. Remove Watermark
     if (options.removeWatermark) {
-        vfFilters.push("delogo=x=15:y=15:w=180:h=50", "delogo=x=iw-195:y=ih-65:w=180:h=50");
+        const vw = options.videoWidth || 1080;
+        const vh = options.videoHeight || 1920;
+        
+        let tlW = Math.min(180, vw - 30);
+        let tlH = Math.min(50, vh - 30);
+        let tlX = 15;
+        let tlY = 15;
+        
+        let brW = Math.min(180, vw - 30);
+        let brH = Math.min(50, vh - 30);
+        let brX = Math.max(0, vw - brW - 15);
+        let brY = Math.max(0, vh - brH - 15);
+
+        vfFilters.push(`delogo=x=${tlX}:y=${tlY}:w=${tlW}:h=${tlH}`, `delogo=x=${brX}:y=${brY}:w=${brW}:h=${brH}`);
     }
 
     // 2. Scale / Crop
