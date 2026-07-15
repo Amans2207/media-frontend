@@ -12,8 +12,8 @@ export const initFFmpeg = async () => {
         
         // Load the font file for subtitles
         try {
-            const fontData = await fetchFile('/fonts/Roboto-Bold.ttf');
-            ffmpeg.FS('writeFile', 'Roboto-Bold.ttf', fontData);
+            const fontData = await fetchFile('/fonts/TikTokFont.ttf');
+            ffmpeg.FS('writeFile', 'TikTokFont.ttf', fontData);
         } catch (e) {
             console.error("Failed to load font:", e);
         }
@@ -111,11 +111,14 @@ export const runClientSideFFmpeg = async (videoFileOrUrl, options, setProgress) 
 
     // 4. Subtitles
     if (options.clientSrt && options.exportFormat !== 'gif') {
-        vfFilters.push(`subtitles=captions.srt:fontsdir=/:force_style='Fontname=Roboto,Fontsize=20,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=3,Alignment=2,MarginV=30'`);
+        vfFilters.push(`subtitles=captions.srt:fontsdir=/:force_style='Fontname=Anton,Fontsize=22,PrimaryColour=&H0000FFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=4,Shadow=1,Alignment=2,MarginV=40'`);
     }
 
     // Process Crop Logic
     let finalVMap = "0:v:0";
+    let finalAMap = null;
+    let filterComplexParts = [];
+
     if (crop !== 'none') {
         let targetW = 720, targetH = 1280;
         if (crop === '1:1') { targetW = 720; targetH = 720; }
@@ -129,44 +132,34 @@ export const runClientSideFFmpeg = async (videoFileOrUrl, options, setProgress) 
         const bgH = Math.floor(targetH / 3);
         const baseFilter = vfFilters.length > 0 ? vfFilters.join(',') : 'null';
 
-        let filterComplex = `[0:v]${baseFilter},split=2[base1][base2];[base1]scale=${bgW}:${bgH}:force_original_aspect_ratio=increase,crop=${bgW}:${bgH},boxblur=15:15,scale=${targetW}:${targetH}[bg];[base2]scale=${targetW}:${targetH}:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2[outv]`;
+        let vFilter = `[0:v]${baseFilter},split=2[base1][base2];[base1]scale=${bgW}:${bgH}:force_original_aspect_ratio=increase,crop=${bgW}:${bgH},boxblur=15:15,scale=${targetW}:${targetH}[bg];[base2]scale=${targetW}:${targetH}:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2[outv]`;
 
         if (options.exportFormat === 'gif') {
-            filterComplex += `;[outv]split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse[gifout]`;
+            vFilter += `;[outv]split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse[gifout]`;
             finalVMap = "[gifout]";
         } else {
             finalVMap = "[outv]";
         }
-        ffmpegArgs.push('-filter_complex', filterComplex, '-map', finalVMap);
+        filterComplexParts.push(vFilter);
     } else {
         if (options.exportFormat === 'gif') {
             if (vfFilters.length > 0) {
-                ffmpegArgs.push('-filter_complex', `${vfFilters.join(',')},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`);
+                filterComplexParts.push(`${vfFilters.join(',')},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse[gifout]`);
             } else {
-                ffmpegArgs.push('-filter_complex', `split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`);
+                filterComplexParts.push(`split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse[gifout]`);
             }
+            finalVMap = "[gifout]";
         } else {
             if (vfFilters.length > 0) {
                 ffmpegArgs.push('-vf', vfFilters.join(','));
             }
-            ffmpegArgs.push('-map', '0:v:0');
+            finalVMap = "0:v:0";
         }
     }
 
     // Audio Filters
     if (options.reverse) afFilters.push("areverse");
     if (options.speed && options.speed !== 1.0) afFilters.push(`atempo=${options.speed}`);
-
-    if (hasAudio && options.exportFormat !== 'gif') {
-        const audioOffset = options.customAudioOffset || 0;
-        if (audioOffset > 0) {
-            const delayMs = Math.round(audioOffset * 1000);
-            afFilters.push(`adelay=${delayMs}|${delayMs}`);
-        }
-        if (options.customAudioEnhance) {
-            afFilters.push("bass=g=6:f=110:w=0.6,treble=g=5:f=10000:w=0.5,extrastereo=m=2.0,crystalizer=i=1.5,volume=1.5");
-        }
-    }
 
     const trimStart = options.trimStart || 0;
     const trimEnd = options.trimEnd || 0;
@@ -179,14 +172,50 @@ export const runClientSideFFmpeg = async (videoFileOrUrl, options, setProgress) 
         if (options.mute && !hasAudio) {
             ffmpegArgs.push('-an');
         } else if (hasAudio) {
-            ffmpegArgs.push('-map', '1:a:0');
-            if (afFilters.length > 0) ffmpegArgs.push('-af', afFilters.join(','));
-            ffmpegArgs.push('-shortest');
+            if (options.mute) {
+                finalAMap = '1:a:0';
+                if (options.customAudioOffset > 0) {
+                    const delayMs = Math.round(options.customAudioOffset * 1000);
+                    afFilters.push(`adelay=${delayMs}|${delayMs}`);
+                }
+                if (options.customAudioEnhance) {
+                    afFilters.push("bass=g=6:f=110:w=0.6,treble=g=5:f=10000:w=0.5,extrastereo=m=2.0,crystalizer=i=1.5,volume=1.5");
+                }
+                if (afFilters.length > 0) ffmpegArgs.push('-af', afFilters.join(','));
+                ffmpegArgs.push('-shortest');
+            } else {
+                let mixFilter = `[0:a]volume=1.5[a0];[1:a]volume=0.25`;
+                
+                const audioOffset = options.customAudioOffset || 0;
+                if (audioOffset > 0) {
+                    const delayMs = Math.round(audioOffset * 1000);
+                    mixFilter += `,adelay=${delayMs}|${delayMs}`;
+                }
+                if (options.customAudioEnhance) {
+                    mixFilter += `,bass=g=6:f=110:w=0.6,treble=g=5:f=10000:w=0.5,extrastereo=m=2.0,crystalizer=i=1.5`;
+                }
+                mixFilter += `[a1];[a0][a1]amix=inputs=2:duration=first:dropout_transition=2[aout]`;
+                
+                if (afFilters.length > 0) {
+                    mixFilter += `;[aout]${afFilters.join(',')}[afinal]`;
+                    finalAMap = '[afinal]';
+                } else {
+                    finalAMap = '[aout]';
+                }
+                filterComplexParts.push(mixFilter);
+                ffmpegArgs.push('-shortest');
+            }
         } else {
-            ffmpegArgs.push('-map', '0:a?');
+            finalAMap = '0:a?';
             if (afFilters.length > 0) ffmpegArgs.push('-af', afFilters.join(','));
         }
     }
+
+    if (filterComplexParts.length > 0) {
+        ffmpegArgs.push('-filter_complex', filterComplexParts.join(';'));
+    }
+    ffmpegArgs.push('-map', finalVMap);
+    if (finalAMap) ffmpegArgs.push('-map', finalAMap);
 
     if (options.exportFormat === 'gif') {
         ffmpegArgs.push('-loop', '0', outputName);
