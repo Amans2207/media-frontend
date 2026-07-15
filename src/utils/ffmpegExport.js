@@ -23,9 +23,14 @@ export const initFFmpeg = async () => {
 
 export const runClientSideFFmpeg = async (videoFileOrUrl, options, setProgress) => {
     const ffmpeg = await initFFmpeg();
+    
+    let lastPercent = -1;
     ffmpeg.setProgress(({ ratio }) => {
-        // ratio is 0 to 1
-        setProgress(Math.round(ratio * 100));
+        const percent = Math.round(ratio * 100);
+        if (percent !== lastPercent && percent >= 0 && percent <= 100) {
+            lastPercent = percent;
+            setProgress(percent);
+        }
     });
 
     const inputName = 'input.mp4';
