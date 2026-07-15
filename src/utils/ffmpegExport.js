@@ -4,7 +4,10 @@ let ffmpeg = null;
 
 export const initFFmpeg = async () => {
     if (!ffmpeg) {
-        ffmpeg = createFFmpeg({ log: true });
+        ffmpeg = createFFmpeg({ 
+            log: true,
+            corePath: '/ffmpeg/ffmpeg-core.js'
+        });
         await ffmpeg.load();
         
         // Load the font file for subtitles
