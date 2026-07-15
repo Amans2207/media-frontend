@@ -52,16 +52,7 @@ export default function Login({ onLogin }) {
     }
   };
 
-  const handleAppleLogin = async () => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
-      });
-      if (error) throw error;
-    } catch (err) {
-      toast.error(err.message || 'Apple Login failed');
-    }
-  };
+
 
   return (
     <div className="min-h-screen bg-[#030014] text-white relative font-sans flex items-center justify-center p-4">
@@ -133,15 +124,7 @@ export default function Login({ onLogin }) {
           Continue with Google
         </button>
 
-        <button 
-          onClick={handleAppleLogin}
-          className="w-full mt-3 py-3 rounded-xl font-bold bg-white text-black hover:bg-gray-200 transition-all flex items-center justify-center gap-3 shadow-lg"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.26-.79 3.59-.76 1.56.04 2.87.73 3.65 1.87-3.12 1.83-2.61 5.92.51 7.15-.71 1.76-1.55 3.2-2.83 3.91zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.02 4.63-3.74 4.25z"/>
-          </svg>
-          Continue with Apple
-        </button>
+
 
         <div className="mt-8 text-center">
           <button 
