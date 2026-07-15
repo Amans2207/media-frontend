@@ -16,9 +16,9 @@ export async function extractAndResampleAudio(fileOrUrl) {
     return float32Array;
 }
 
-export function formatToSRT(words) {
-    // Whisper returns { word: string, start: number, end: number }
-    if (!words || words.length === 0) return "";
+export function formatToSRT(chunks) {
+    // Transformers.js returns chunks as { text: string, timestamp: [start, end] }
+    if (!chunks || chunks.length === 0) return "";
     
     let srtContent = "";
     let subIndex = 1;
@@ -30,30 +30,22 @@ export function formatToSRT(words) {
         return date.toISOString().substr(11, 12).replace('.', ',');
     };
     
-    const addSub = (phraseWords) => {
-        const text = phraseWords.map(w => w.word.toUpperCase().trim()).join(' ');
-        const start = formatTime(phraseWords[0].start);
-        const end = formatTime(phraseWords[phraseWords.length - 1].end + 0.1);
+    const addSub = (phraseChunks) => {
+        const text = phraseChunks.map(c => c.text.toUpperCase().trim()).join(' ');
+        const start = formatTime(phraseChunks[0].timestamp[0]);
+        const end = formatTime(phraseChunks[phraseChunks.length - 1].timestamp[1] || phraseChunks[phraseChunks.length - 1].timestamp[0] + 0.5);
         
-        srtContent += `${subIndex}\n${start} --> ${end}\n${text}\n\n`;
+        srtContent += ${subIndex}\n --> \n\n\n;
         subIndex++;
     };
     
-    for (let word of words) {
-        if (currentPhrase.length === 0) {
-            currentPhrase.push(word);
-        } else {
-            if (currentPhrase.length >= 4 || (word.start - currentPhrase[currentPhrase.length - 1].end > 0.4)) {
-                addSub(currentPhrase);
-                currentPhrase = [word];
-            } else {
-                currentPhrase.push(word);
-            }
+    // Group words into phrases (max 4 words per phrase for TikTok style)
+    for (let i = 0; i < chunks.length; i++) {
+        currentPhrase.push(chunks[i]);
+        if (currentPhrase.length >= 3 || i === chunks.length - 1) {
+            addSub(currentPhrase);
+            currentPhrase = [];
         }
-    }
-    
-    if (currentPhrase.length > 0) {
-        addSub(currentPhrase);
     }
     
     return srtContent;
