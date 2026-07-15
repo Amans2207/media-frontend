@@ -177,8 +177,19 @@ export const runClientSideFFmpeg = async (videoFileOrUrl, options, setProgress) 
     const trimStart = options.trimStart || 0;
     const trimEnd = options.trimEnd || 0;
     const duration = options.duration || 0;
-    if (trimStart > 0 || (duration > 0 && trimEnd < duration)) {
-        ffmpegArgs.push('-ss', String(trimStart), '-to', String(trimEnd));
+    
+    // Always enforce the video duration to prevent endless audio extending the video
+    let exportDuration = duration;
+    if (trimEnd > 0 && trimEnd < duration) {
+        exportDuration = trimEnd;
+    }
+    
+    if (trimStart > 0 || exportDuration > 0) {
+        if (exportDuration > 0) {
+            ffmpegArgs.push('-ss', String(trimStart), '-to', String(exportDuration));
+        } else {
+            ffmpegArgs.push('-ss', String(trimStart));
+        }
     }
 
     if (options.exportFormat !== 'gif') {
@@ -195,7 +206,7 @@ export const runClientSideFFmpeg = async (videoFileOrUrl, options, setProgress) 
                     afFilters.push("bass=g=6:f=110:w=0.6,treble=g=5:f=10000:w=0.5,extrastereo=m=2.0,crystalizer=i=1.5,volume=1.5");
                 }
                 if (afFilters.length > 0) ffmpegArgs.push('-af', afFilters.join(','));
-                ffmpegArgs.push('-shortest');
+                // Removed -shortest to prevent truncating video if audio is shorter
             } else {
                 let mixFilter = `[0:a]volume=1.5[a0];[1:a]volume=0.25`;
                 
@@ -207,6 +218,7 @@ export const runClientSideFFmpeg = async (videoFileOrUrl, options, setProgress) 
                 if (options.customAudioEnhance) {
                     mixFilter += `,bass=g=6:f=110:w=0.6,treble=g=5:f=10000:w=0.5,extrastereo=m=2.0,crystalizer=i=1.5`;
                 }
+                // duration=first ensures the mix stops when the original video audio stops
                 mixFilter += `[a1];[a0][a1]amix=inputs=2:duration=first:dropout_transition=2[aout]`;
                 
                 if (afFilters.length > 0) {
@@ -216,7 +228,7 @@ export const runClientSideFFmpeg = async (videoFileOrUrl, options, setProgress) 
                     finalAMap = '[aout]';
                 }
                 filterComplexParts.push(mixFilter);
-                ffmpegArgs.push('-shortest');
+                // Removed -shortest to prevent truncating video if audio is shorter
             }
         } else {
             finalAMap = '0:a?';
