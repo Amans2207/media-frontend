@@ -103,7 +103,7 @@ export const runClientSideFFmpeg = async (videoFileOrUrl, options, setProgress) 
 
     // 4. Subtitles
     if (options.clientSrt && options.exportFormat !== 'gif') {
-        vfFilters.push(`subtitles=captions.srt:force_style='Fontname=Roboto Bold,Fontsize=80,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=3,Alignment=2,MarginV=60'`);
+        vfFilters.push(`subtitles=captions.srt:fontsdir=/:force_style='Fontname=Roboto,Fontsize=80,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=3,Alignment=2,MarginV=60'`);
     }
 
     // Process Crop Logic

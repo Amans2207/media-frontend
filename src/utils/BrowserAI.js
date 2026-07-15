@@ -1,8 +1,14 @@
 // Utility to decode audio and run Whisper locally in browser
 
-export async function extractAndResampleAudio(file) {
+export async function extractAndResampleAudio(fileOrUrl) {
+    let arrayBuffer;
+    if (typeof fileOrUrl === 'string') {
+        const response = await fetch(fileOrUrl);
+        arrayBuffer = await response.arrayBuffer();
+    } else {
+        arrayBuffer = await fileOrUrl.arrayBuffer();
+    }
     const audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
-    const arrayBuffer = await file.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
     
     // We only need the first channel (mono)
