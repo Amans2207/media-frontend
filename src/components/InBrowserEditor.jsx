@@ -71,19 +71,7 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
   const handleExport = async () => {
     try {
       setIsProcessing(true);
-      setProgress(50); // Show fake progress while server processes
-      
-      const formData = new FormData();
-      if (fileUrl) {
-          formData.append('fileUrl', fileUrl);
-      }
-      if (customVideo) {
-          formData.append('videoFile', customVideo);
-      }
-      
-      if (customAudio) {
-        formData.append('audioFile', customAudio);
-      }
+      setProgress(0);
       
       const options = {
           crop,
@@ -101,95 +89,67 @@ export default function InBrowserEditor({ fileUrl, filename, onClose }) {
           removeWatermark,
           compressWhatsApp,
           autoCaptions,
-          originalUrl: fileUrl // Fallback original URL if present
-        };
-        
-        formData.append('options', JSON.stringify(options));
-        
-        // --- SMART CAPTIONS ENGINE ---
-        if (autoCaptions && customVideo && duration > 120) {
-          // Video is local and > 2 minutes: Use Browser AI
-          setLoadingMsg("Generating Captions locally (Browser AI)...");
+      };
+      
+      let clientSrt = null;
+      const targetVideo = customVideo || fileUrl;
+      
+      if (autoCaptions && targetVideo) {
+          setLoadingMsg("Generating AI Captions locally...");
           const { extractAndResampleAudio, formatToSRT } = await import('../utils/BrowserAI.js');
-          
           try {
-            const float32Array = await extractAndResampleAudio(customVideo);
+            const float32Array = await extractAndResampleAudio(targetVideo);
             const worker = new Worker(new URL('../worker.js', import.meta.url), { type: 'module' });
             
-            const clientSrt = await new Promise((resolve, reject) => {
+            clientSrt = await new Promise((resolve, reject) => {
                 worker.addEventListener('message', (e) => {
                     if (e.data.status === 'complete') {
                         resolve(formatToSRT(e.data.output.chunks || e.data.output));
                     } else if (e.data.status === 'error') {
                         reject(e.data.error);
-                    } else if (e.data.status === 'progress') {
-                        setProgress(prev => prev < 90 ? prev + 1 : 90);
                     }
                 });
                 worker.postMessage({ audio: float32Array, id: 1 });
             });
-            
-            if (clientSrt) {
-              formData.append('clientSrt', clientSrt);
-            }
+            options.clientSrt = clientSrt;
           } catch(err) {
             console.error("Browser AI failed:", err);
-            // It will fallback to backend Vosk AI silently!
+            toast.error("Caption generation failed. Continuing without captions.");
           }
-          setLoadingMsg("Uploading to server...");
-        }
-        
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://media-backend-production-b846.up.railway.app';
-      const response = await axios.post(`${backendUrl}/api/editor/process`, formData);
-      const data = response.data;
-      
-      if (data.success && data.task_id) {
-        const taskId = data.task_id;
-        setProgress(10);
-        
-        const pollStatus = async () => {
-          try {
-            const statusRes = await axios.get(`${backendUrl}/api/editor/status/${taskId}`);
-            const statusData = statusRes.data;
-            
-            if (statusData.status === 'completed') {
-              setProgress(100);
-              const fullUrl = `${backendUrl}${statusData.fileUrl}?download=true`;
-              const link = document.createElement('a');
-              link.href = fullUrl;
-              link.download = `edited_${filename}`;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              
-              toast.success("Video exported successfully!");
-              setIsProcessing(false);
-              onClose();
-            } else if (statusData.status === 'error') {
-              setIsProcessing(false);
-              toast.error(statusData.error || "Server processing failed");
-            } else {
-              // Still processing
-              setProgress(prev => prev >= 95 ? 95 : prev + 5); // Fake progress
-              setTimeout(pollStatus, 3000);
-            }
-          } catch (e) {
-            console.error("Polling error:", e);
-            setTimeout(pollStatus, 3000);
-          }
-        };
-        
-        setTimeout(pollStatus, 3000);
-        return; // Don't reset isProcessing in finally block yet
-      } else {
-        throw new Error("Invalid response from server");
       }
+      
+      setLoadingMsg("Rendering video...");
+      
+      // Dynamic import to avoid loading ffmpeg.wasm if not exporting
+      const { runClientSideFFmpeg } = await import('../utils/ffmpegExport.js');
+      
+      const outputBlob = await runClientSideFFmpeg(
+          targetVideo,
+          { ...options, customAudio },
+          setProgress
+      );
+      
+      setProgress(100);
+      const url = URL.createObjectURL(outputBlob);
+      
+      // Auto-download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `edited_${exportFormat === 'gif' ? 'video.gif' : (exportFormat === 'mp3' ? 'audio.mp3' : 'video.mp4')}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Update preview to show the edited video
+      setPreviewUrl(url);
+      toast.success("Export completed locally! 🎉");
       
     } catch (error) {
       console.error(error);
       toast.error(error.message || "An error occurred during editing.");
+    } finally {
       setIsProcessing(false);
-    } // No finally block, handled inside success/error paths
+    }
   };
 
   return (
