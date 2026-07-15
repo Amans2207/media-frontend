@@ -35,7 +35,7 @@ export function formatToSRT(chunks) {
         const start = formatTime(phraseChunks[0].timestamp[0]);
         const end = formatTime(phraseChunks[phraseChunks.length - 1].timestamp[1] || phraseChunks[phraseChunks.length - 1].timestamp[0] + 0.5);
         
-        srtContent += ${subIndex}\n --> \n\n\n;
+        srtContent += `${subIndex}\n${start} --> ${end}\n${text}\n\n`;
         subIndex++;
     };
     
